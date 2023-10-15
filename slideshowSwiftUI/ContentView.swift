@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var delayInput: String = "5"
     @State private var randomOrder = false
     @State private var showAlert = false
+    @State private var isLoading = false
     
     let backgroundGradient = LinearGradient(
         colors: [Color.white, Color.white],
@@ -22,42 +23,46 @@ struct ContentView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            
-            /**            if !images.isEmpty {
-             //ImageView(identifiableImages: images)
-             Text("Selected Files:")
-             List(selectedFileNames, id: \.self, rowContent: { fileName in
-             Text(fileName)
-             })
-             }
-             */
-            
-            // Use a fixed frame for the list
-        
-            
-            ScrollView(.vertical) {
-                VStack {
-                    
-                    if !images.isEmpty {
-                        ImageView(identifiableImages: images)
-                            .frame(height: 300)
+
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(spacing: 20) {
+                    ZStack {
+                        if !images.isEmpty {
+                            ImageView(identifiableImages: images)
+                                .frame(height: 300)
+                                .background(Color.white) // Add this line
+                                .cornerRadius(8) // Optional: Add corner radius for a rounded look
+                        } else {
+                            Color.white // Set the background color of the VStack
+                                .frame(height: 300) // Set a fixed height
+                        }
                     }
-                    
-                    // Fixed frame and scrollbar for selected file names
- /**                   List(selectedFileNames, id: \.self) { fileName in
-                        Text(fileName)
-                    }
-                    .frame(height: 200) // Set the fixed height
-  */
+                    .border(Color.black) // Optional: Add border for visualization
                 }
+                .frame(minHeight: 200) // Set the initial height of the scrollable panel
+            }
+
+            
+            if isLoading {
+                ProgressView("Loading Images...")
+                    .padding(.top, 10)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
             
-            // Label displaying the number of files
+            // Label displaying the number of files added
             if !images.isEmpty {
-                HStack(alignment: .center) {
-                    Text("\(selectedFileNames.count) files on the list")
+                VStack(alignment: .center) {
+                    Text("\(selectedFileNames.count) files added")
                         .font(.headline)
-                    .padding(.top, 10)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(10)
+                }
+            } else {
+                VStack(alignment: .center) {
+                    Text("Please add files")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(10)
                 }
             }
             
@@ -71,8 +76,14 @@ struct ContentView: View {
                     loadImages(from: openPanel.urls)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding()
+            
         
+//            if isLoading {
+//                ProgressView("Loading Images...")
+//                    .padding(.top, 10)
+//            }
             
             
             GroupBox(label: Text("Settings")
@@ -120,19 +131,30 @@ struct ContentView: View {
         }
         .background(Color("CustomColor"))
     }
-       
+    
     
     func loadImages(from urls: [URL]) {
-        images.removeAll()
         
-        for url in urls {
-            if let nsImage = NSImage(contentsOf: url) {
-                let fileName = url.lastPathComponent
-                selectedFileNames.append(fileName)
-                images.append(IdentifiableImage(image: Image(nsImage: nsImage)))
+        isLoading = true
+        
+        DispatchQueue.global(qos: .background).async {
+            var loadedImages = [IdentifiableImage]()
+            
+            for url in urls {
+                if let nsImage = NSImage(contentsOf: url) {
+                    let fileName = url.lastPathComponent
+                    self.selectedFileNames.append(fileName)
+                    loadedImages.append(IdentifiableImage(image: Image(nsImage: nsImage)))
+                }
+            }
+            
+            DispatchQueue.main.async {
+                self.images = loadedImages
+                self.isLoading = false // Set isLoading back to false
             }
         }
     }
+
     
     func runSlideshow() {
         // Create a separate window for the slideshow
@@ -142,6 +164,15 @@ struct ContentView: View {
             backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.center()
+        // Set window background color to black
+        window.backgroundColor = NSColor.black
+        
+    
+        // Hide the menu bar and dock
+
+        NSApp.presentationOptions = [
+            //.autoHideMenuBar,
+            .hideDock]
         
         let slideshowView = SlideshowView(images: images, slideshowDelay: slideshowDelay, randomOrder: randomOrder)
         
@@ -149,6 +180,7 @@ struct ContentView: View {
         
         window.makeKeyAndOrderFront(nil)
     }
+    
     
 }
 
