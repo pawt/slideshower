@@ -11,6 +11,8 @@
 		DE658D102AD6B0BE0006A5EE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D0F2AD6B0BE0006A5EE /* ContentView.swift */; };
 		DE658D122AD6B0BE0006A5EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE658D112AD6B0BE0006A5EE /* Assets.xcassets */; };
 		DE658D152AD6B0BE0006A5EE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE658D142AD6B0BE0006A5EE /* Preview Assets.xcassets */; };
+		DE658D1D2AD6B0F60006A5EE /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D1C2AD6B0F60006A5EE /* ImageView.swift */; };
+		DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,8 @@
 		DE658D112AD6B0BE0006A5EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE658D142AD6B0BE0006A5EE /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DE658D162AD6B0BE0006A5EE /* slideshowSwiftUI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = slideshowSwiftUI.entitlements; sourceTree = "<group>"; };
+		DE658D1C2AD6B0F60006A5EE /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +57,9 @@
 			isa = PBXGroup;
 			children = (
 				DE658D0D2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift */,
+				DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */,
 				DE658D0F2AD6B0BE0006A5EE /* ContentView.swift */,
+				DE658D1C2AD6B0F60006A5EE /* ImageView.swift */,
 				DE658D112AD6B0BE0006A5EE /* Assets.xcassets */,
 				DE658D162AD6B0BE0006A5EE /* slideshowSwiftUI.entitlements */,
 				DE658D132AD6B0BE0006A5EE /* Preview Content */,
@@ -139,8 +145,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE658D1D2AD6B0F60006A5EE /* ImageView.swift in Sources */,
 				DE658D102AD6B0BE0006A5EE /* ContentView.swift in Sources */,
 				DE658D0E2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift in Sources */,
+				DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +285,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"slideshowSwiftUI/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photos slideshow";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -302,6 +312,8 @@
 				DEVELOPMENT_ASSET_PATHS = "\"slideshowSwiftUI/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Photos slideshow";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
