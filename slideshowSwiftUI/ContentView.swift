@@ -22,31 +22,28 @@ struct ContentView: View {
         startPoint: .top, endPoint: .bottom)
     
     var body: some View {
-        VStack(alignment: .leading) {
-
+        VStack() {
+            
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(spacing: 20) {
+                VStack() {
                     ZStack {
                         if !images.isEmpty {
                             ImageView(identifiableImages: images)
-                                .frame(height: 300)
+                                .frame(height: 400)
                                 .background(Color.white) // Add this line
                                 .cornerRadius(8) // Optional: Add corner radius for a rounded look
                         } else {
                             Color.white // Set the background color of the VStack
-                                .frame(height: 300) // Set a fixed height
+                                .frame(height: 400) // Set a fixed height
+                        }
+                        if isLoading {
+                            ProgressView("Loading Images...")
+                                .padding(.top, 10)
+                                .frame(maxWidth: .infinity, alignment: .center)
                         }
                     }
-                    .border(Color.black) // Optional: Add border for visualization
                 }
-                .frame(minHeight: 200) // Set the initial height of the scrollable panel
-            }
-
-            
-            if isLoading {
-                ProgressView("Loading Images...")
-                    .padding(.top, 10)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                .frame(height: 400) // Set the initial height of the scrollable panel
             }
             
             // Label displaying the number of files added
@@ -60,9 +57,8 @@ struct ContentView: View {
             } else {
                 VStack(alignment: .center) {
                     Text("Please add files")
-                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(10)
+                        //.padding(.top)
                 }
             }
             
@@ -77,59 +73,60 @@ struct ContentView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .center)
-            .padding()
+            .padding(.bottom)
             
-        
-//            if isLoading {
-//                ProgressView("Loading Images...")
-//                    .padding(.top, 10)
-//            }
-            
-            
-            GroupBox(label: Text("Settings")
-                .font(.subheadline)
-                .padding(.bottom, 5)) {
-                    VStack(alignment: .leading) {
-                        Toggle("Random Order", isOn: $randomOrder)
-                            .padding(6)
-                        HStack {
-                            Text("Slideshow Delay (in sec):")
-                            TextField("Enter delay", text: $delayInput)
-                                .frame(width: 60)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: delayInput) { newValue in
-                                    if let delay = Double(newValue) {
-                                        slideshowDelay = delay
+            HStack {
+                GroupBox(label: Text("Settings")
+                    .font(.title2)
+                    .padding(.bottom, 5)) {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text("Random Order")
+                                Spacer()
+                                Toggle("", isOn: $randomOrder)
+                                    .padding(6)
+                            }
+                            .padding(10)
+                            HStack {
+                                Text("Slideshow delay:")
+                                Spacer()
+                                TextField("Enter delay", text: $delayInput)
+                                    .frame(width: 60)
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: delayInput) { newValue in
+                                        if let delay = Double(newValue) {
+                                            slideshowDelay = delay
+                                        }
                                     }
-                                }
+                                Text("sec")
+                            }
+                            .padding(10)
                         }
-                        .padding(6)
                     }
-                    
-                    
+                    .frame(maxWidth: 300)
+                    .padding(.leading)
+                
+                Button("Run Slideshow") {
+                    if images.isEmpty {
+                        showAlert = true
+                    } else {
+                        runSlideshow()
+                    }
                 }
-                .position(x: 150, y: 100)
-            
-            Button("Run Slideshow") {
-                if images.isEmpty {
-                    showAlert = true
-                } else {
-                    runSlideshow()
+                .padding()
+                .controlSize(.large)
+                .buttonStyle(.borderedProminent)
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("No Images Selected"),
+                        message: Text("Please select images before running the slideshow."),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
             }
-            .padding()
-            .controlSize(.large)
-            .position(x: 450, y: -20)
-            .buttonStyle(.borderedProminent)
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("No Images Selected"),
-                    message: Text("Please select images before running the slideshow."),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+            .padding(.bottom, 10.0)
         }
-        .background(Color("CustomColor"))
     }
     
     
