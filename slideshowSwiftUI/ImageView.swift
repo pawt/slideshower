@@ -22,12 +22,16 @@ struct ImageView: View {
                     ForEach(identifiableImages, id: \.id) { image in
                         image.image
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(contentMode: .fit)
+                            .cornerRadius(5)
                             .frame(width: 100, height: 100)
                             .clipped()
                     }
+                    .padding(2)
                 }
             }
+            .padding(.top, 10)
+            .padding(.horizontal, 10)
         } else {
             EmptyView()
         }

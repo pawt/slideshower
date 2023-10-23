@@ -13,8 +13,23 @@ struct slideshowSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .frame(minWidth: 600, minHeight: 600)
+                .frame(minWidth: 800, minHeight: 800)
         }
         .windowResizability(.contentSize)
+        .commands {
+            // for example
+            CommandGroup(replacing: .help) {
+                Button(action: {}) {
+                    Text("MyApp Help")
+                }
+            }
+            CommandMenu("File") {
+                            Button("Print message") {
+                                print("Hello World!")
+                            }
+                            .keyboardShortcut("p")
+            }
+            
+        }
     }
 }

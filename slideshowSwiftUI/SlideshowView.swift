@@ -11,10 +11,12 @@ struct SlideshowView: View {
     let images: [IdentifiableImage]
     let slideshowDelay: Double
     let randomOrder: Bool
+    let loopSlideshow: Bool
 
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
-    
+    @State private var isMouseOver = false
+
     var body: some View {
         ZStack {
             if images.indices.contains(currentIndex) {
@@ -45,14 +47,16 @@ struct SlideshowView: View {
         }
     }
 
-    
+
     private func startSlideshow() {
         let queue = DispatchQueue.global(qos: .background)
         queue.asyncAfter(deadline: .now() + slideshowDelay) {
             if currentIndex < images.count - 1 {
                 currentIndex += 1
             } else {
-                currentIndex = 0
+                if loopSlideshow {
+                    currentIndex = 0
+                }
             }
             startSlideshow()
         }
