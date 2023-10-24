@@ -40,10 +40,17 @@ struct ContentView: View {
                         } else if images.isEmpty {
                             Color.white // Set the background color of the VStack
                                 .frame(minHeight: 600)
+                            Image("slideshower_logo")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width:300)
+                                .opacity(0.5)
                             Text("Selected photos will appear here")
                                 .fontWeight(.light)
                                 .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                                //.foregroundColor(Color(red:189, green:186, blue: 221))
+                                .font(.title2)
+                                .offset(y: 100)
                         }
                     }
                     .frame(height: 600) // Set the initial height of the scrollable panel
@@ -164,6 +171,7 @@ struct ContentView: View {
                 
                 Spacer()
                 
+
                 VStack() {
                     Text("Run slideshow")
                         .font(.title2)
@@ -205,7 +213,10 @@ struct ContentView: View {
                     NSCursor.arrow.set()
                 }
             }
+            
         }
+        
+
     }
         
     

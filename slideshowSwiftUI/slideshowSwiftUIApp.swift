@@ -18,11 +18,11 @@ struct slideshowSwiftUIApp: App {
         .windowResizability(.contentSize)
         .commands {
             // for example
-            CommandGroup(replacing: .help) {
-                Button(action: {}) {
-                    Text("MyApp Help")
-                }
-            }
+//            CommandGroup(replacing: .help) {
+//                Button(action: {}) {
+//                    Text("MyApp Help")
+//                }
+//            }
         }
     }
 }
