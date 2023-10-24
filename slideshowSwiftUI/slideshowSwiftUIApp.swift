@@ -23,13 +23,6 @@ struct slideshowSwiftUIApp: App {
                     Text("MyApp Help")
                 }
             }
-            CommandMenu("File") {
-                            Button("Print message") {
-                                print("Hello World!")
-                            }
-                            .keyboardShortcut("p")
-            }
-            
         }
     }
 }

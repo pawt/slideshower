@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var isHovered = false
     @State private var loopSlideshow = false
+    @State private var isInfoVisible = false
     
     var body: some View {
     
@@ -30,17 +31,15 @@ struct ContentView: View {
                         if !images.isEmpty {
                             ImageView(identifiableImages: images)
                                 .frame(minHeight: 600)
-                                .background(Color.white) // Add this line
-                                .cornerRadius(8) // Optional: Add corner radius for a rounded look
+                                .background(Color.white)
                         }
-                        
                         if isLoading {
                             ProgressView("Loading Images...")
                                 .frame(maxWidth: .infinity, minHeight: 600)
                                 .background(Color.white)
                         } else if images.isEmpty {
                             Color.white // Set the background color of the VStack
-                                .frame(minHeight: 600) // Set a fixed height
+                                .frame(minHeight: 600)
                             Text("Selected photos will appear here")
                                 .fontWeight(.light)
                                 .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
@@ -51,8 +50,7 @@ struct ContentView: View {
                 }
             }
             
-            
-            
+
             HStack(alignment: .top){
                 
                 Spacer()
@@ -103,6 +101,36 @@ struct ContentView: View {
                     .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 20))
                     .frame(maxWidth: .infinity, alignment: .center)) {
                         VStack(alignment: .leading) {
+                            HStack() {
+                                Spacer ()
+                                Button(action: {
+                                    isInfoVisible.toggle()
+                                }) {
+                                    Image(systemName: "questionmark.circle")
+                                        .font(.system(size: 14))
+                                }
+                                .help("Click for more information")
+                                .buttonStyle(PlainButtonStyle())
+                                .popover(isPresented: $isInfoVisible, content: {
+                                    VStack {
+                                        Text("Settings - help")
+                                            .font(.headline)
+                                            .padding()
+                                        HStack {
+                                            Text("Random slideshow order")
+                                                .fontWeight(.bold)
+                                            Text("- if enabled the files will be shown in a random order.")
+                                        }
+                                        HStack {
+                                            Text("Loop slideshow")
+                                                .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                                            Text("- if enabled the slideshow will not terminate itself.")
+                                        }
+                                    }
+                                    .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
+                                })
+                            }
+                            .padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
                             HStack {
                                 Text("Slideshow delay (in sec):")
                                 Spacer()
@@ -116,18 +144,21 @@ struct ContentView: View {
                                         }
                                     }
                             }
+                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                             HStack {
                                 Text("Random slideshow order:")
                                 Spacer()
                                 Toggle("", isOn: $randomOrder)
                             }
+                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                             HStack {
                                 Text("Loop slideshow:")
                                 Spacer()
                                 Toggle("", isOn: $loopSlideshow)
                             }
+                            .padding(.init(top: 0, leading: 10, bottom: 30, trailing: 10))
                         }
-                        .padding(12)
+                        .padding(0)
                     }
                     .frame(maxWidth: 300)
                 
@@ -206,7 +237,6 @@ struct ContentView: View {
         // Create a separate window for the slideshow
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
-            //styleMask: [.borderless, .fullSizeContentView],
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false)
