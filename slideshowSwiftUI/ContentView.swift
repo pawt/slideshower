@@ -188,7 +188,7 @@ struct ContentView: View {
                             .foregroundStyle(Color.white)
                             .shadow(radius: 5)
                             .padding(.init(top: 16, leading: 35, bottom: 16, trailing: 35))
-                            .background(RoundedRectangle(cornerRadius:8).fill(Color.green))
+                            .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 0.295, saturation: 1.0, brightness: 0.68)))
                             .frame(minWidth: 100)
                     }
                     .buttonStyle(PlainButtonStyle())

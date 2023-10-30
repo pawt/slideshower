@@ -18,13 +18,13 @@ struct ImageView: View {
     var body: some View {
         if let identifiableImages = identifiableImages {
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))]) {
                     ForEach(identifiableImages, id: \.id) { image in
                         image.image
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .cornerRadius(5)
-                            .frame(width: 100, height: 100)
+                            .frame(width: 150, height: 150)
                             .clipped()
                     }
                     .padding(2)
