@@ -72,14 +72,31 @@ struct ContentView: View {
                     Button(action: {
                         let openPanel = NSOpenPanel()
                         openPanel.allowsMultipleSelection = true
-                        openPanel.canChooseDirectories = false
+                        openPanel.canChooseDirectories = true
                         openPanel.canChooseFiles = true
                         openPanel.allowedContentTypes = [UTType.jpeg, UTType.png, UTType.heic]
                         if openPanel.runModal() == .OK {
-                            loadImages(from: openPanel.urls)
+                            let group = DispatchGroup()
+                            
+                            for url in openPanel.urls {
+                                group.enter() // Enter the group
+                                if url.hasDirectoryPath {
+                                    addImagesFromDirectory(url) {
+                                        group.leave() // Leave the group once images are loaded
+                                    }
+                                } else {
+                                    loadImages(from: [url]) {
+                                        group.leave() // Leave the group once image is loaded
+                                    }
+                                }
+                            }
+                            group.notify(queue: .main) {
+                                // This will be called once all images are loaded
+                                self.showPhotoCounterInfo = true
+                            }
                         }
                     }) {
-                        Text("Select files").font(.system(size: 13))
+                        Text("Select files or a folder").font(.system(size: 13))
                             .foregroundStyle(Color.white)
                             .shadow(radius: 5)
                             .padding()
@@ -218,27 +235,47 @@ struct ContentView: View {
         
 
     }
+    
+    func addImagesFromDirectory(_ directoryURL: URL, completion: @escaping () -> Void) {
+        let fileManager = FileManager.default
+        var urlsToLoad: [URL] = []
+        do {
+            let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            for fileURL in fileURLs {
+                let fileType = fileURL.pathExtension.lowercased()
+                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
+                    urlsToLoad.append(fileURL)
+                }
+            }
+            loadImages(from: urlsToLoad, completion: completion)
+        } catch {
+            print("Error reading directory contents: \(error)")
+            completion()
+        }
+    }
+
         
     
-    func loadImages(from urls: [URL]) {
-        
+    func loadImages(from urls: [URL], completion: @escaping () -> Void) {
         isLoading = true
         
         DispatchQueue.global(qos: .background).async {
-            var loadedImages = [IdentifiableImage]()
+            var newImages = [IdentifiableImage]()
+            var newFileNames = [String]()
             
             for url in urls {
                 if let nsImage = NSImage(contentsOf: url) {
                     let fileName = url.lastPathComponent
-                    self.selectedFileNames.append(fileName)
-                    loadedImages.append(IdentifiableImage(image: Image(nsImage: nsImage)))
+                    newFileNames.append(fileName)
+                    newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage)))
                 }
             }
             
             DispatchQueue.main.async {
-                self.images = loadedImages
+                self.images.append(contentsOf: newImages)
+                self.selectedFileNames.append(contentsOf: newFileNames)
                 self.isLoading = false
-                self.showPhotoCounterInfo = true
+                completion()
             }
         }
     }
