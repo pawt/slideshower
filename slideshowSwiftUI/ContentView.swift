@@ -30,16 +30,16 @@ struct ContentView: View {
                     ZStack {
                         if !images.isEmpty {
                             ImageView(identifiableImages: images)
-                                .frame(minHeight: 600)
+                                .frame(minHeight: 500)
                                 .background(Color.white)
                         }
                         if isLoading {
                             ProgressView("Loading Images...")
-                                .frame(maxWidth: .infinity, minHeight: 600)
+                                .frame(maxWidth: .infinity, minHeight: 500)
                                 .background(Color.white)
                         } else if images.isEmpty {
                             Color.white // Set the background color of the VStack
-                                .frame(minHeight: 600)
+                                .frame(minHeight: 500)
                             Image("slideshower_logo")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
@@ -53,7 +53,7 @@ struct ContentView: View {
                                 .offset(y: 100)
                         }
                     }
-                    .frame(height: 600) // Set the initial height of the scrollable panel
+                    .frame(height: 500) // Set the initial height of the scrollable panel
                 }
             }
             
@@ -170,7 +170,7 @@ struct ContentView: View {
                             }
                             .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                             HStack {
-                                Text("Random slideshow order:")
+                                Text("Shuffle mode:")
                                 Spacer()
                                 Toggle("", isOn: $randomOrder)
                             }
@@ -286,7 +286,7 @@ struct ContentView: View {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
             //styleMask: [.titled, .closable, .resizable],
-            styleMask: [.fullSizeContentView, .closable, .resizable],
+            styleMask: [.fullSizeContentView, .closable, .resizable, .miniaturizable, .titled],
             backing: .buffered,
             defer: false)
         

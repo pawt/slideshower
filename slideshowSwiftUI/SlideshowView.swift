@@ -4,7 +4,6 @@
 //
 //  Created by Paweł Trybulski on 11/10/2023.
 //
-
 import SwiftUI
 
 struct SlideshowView: View {
@@ -16,7 +15,10 @@ struct SlideshowView: View {
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
     @State private var isMouseOver = false
+    @State private var isSlideshowRunning = true
 
+    @Environment(\.presentationMode) var presentationMode
+    
     var body: some View {
         ZStack {
             if images.indices.contains(currentIndex) {
@@ -27,42 +29,74 @@ struct SlideshowView: View {
             }
         }
         .onAppear {
-            if randomOrder {
-                shuffledIndices = Array(0..<images.count).shuffled()
-                startRandomSlideshow()
-            } else {
-                startSlideshow()
+            // Start the slideshow
+            if isSlideshowRunning {
+                if randomOrder {
+                    shuffledIndices = Array(0..<images.count).shuffled()
+                    startRandomSlideshow()
+                } else {
+                    startSlideshow()
+                }
+            }
+            
+            // Add observer to handle exit from full-screen
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didExitFullScreenNotification,
+                object: nil,
+                queue: .main) { _ in
+                    self.stopSlideshow()
+                }
+        }
+        .onDisappear {
+            // Stop the slideshow and remove observer when view disappears
+            stopSlideshow()
+            NotificationCenter.default.removeObserver(self)
+        }
+        
+        KeyPressHandlingView { event in
+            if event.keyCode == 53 { // 53 is the key code for ESC
+                stopSlideshow() // Call the stopSlideshow function
             }
         }
-
+        .frame(width: 0, height: 0)
     }
     
     private func startRandomSlideshow() {
+        guard isSlideshowRunning else { return }
+        
         let queue = DispatchQueue.global(qos: .background)
         queue.asyncAfter(deadline: .now() + slideshowDelay) {
-            if !shuffledIndices.isEmpty {
-                currentIndex = shuffledIndices.removeFirst()
-                startRandomSlideshow()
+            guard self.isSlideshowRunning else { return }
+            
+            if !self.shuffledIndices.isEmpty {
+                self.currentIndex = self.shuffledIndices.removeFirst()
+                self.startRandomSlideshow()
             }
         }
     }
-
 
     private func startSlideshow() {
+        guard isSlideshowRunning else { return }
+        
         let queue = DispatchQueue.global(qos: .background)
         queue.asyncAfter(deadline: .now() + slideshowDelay) {
-            if currentIndex < images.count - 1 {
-                currentIndex += 1
+            guard self.isSlideshowRunning else { return }
+            
+            if self.currentIndex < self.images.count - 1 {
+                self.currentIndex += 1
             } else {
-                if loopSlideshow {
-                    currentIndex = 0
+                if self.loopSlideshow {
+                    self.currentIndex = 0
                 }
             }
-            startSlideshow()
+            self.startSlideshow()
         }
     }
+
+    
+    // Function to stop the slideshow
+    private func stopSlideshow() {
+        isSlideshowRunning = false
+        presentationMode.wrappedValue.dismiss()
+    }
 }
-
-
-
-
