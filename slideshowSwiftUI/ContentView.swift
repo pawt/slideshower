@@ -248,22 +248,27 @@ struct ContentView: View {
         // Create a separate window for the slideshow
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
-            styleMask: [.titled, .closable, .resizable],
+            //styleMask: [.titled, .closable, .resizable],
+            styleMask: [.fullSizeContentView, .closable, .resizable],
             backing: .buffered,
             defer: false)
         
         window.isReleasedWhenClosed = false
         window.center()
         window.backgroundColor = NSColor.black
+        window.titlebarAppearsTransparent = true // Ensure the title bar is transparent
+        window.titleVisibility = .hidden // Hide the title
+        
+        window.level = .mainMenu
+        window.collectionBehavior = .fullScreenPrimary
+        
+        window.toggleFullScreen(nil)
         
         // Hide the menu bar and dock
         NSApp.presentationOptions = [
             .autoHideMenuBar,
             .autoHideDock
         ]
-        
-        window.level = .mainMenu
-        window.collectionBehavior = .fullScreenPrimary
         
         let slideshowView = SlideshowView(
             images: images,
