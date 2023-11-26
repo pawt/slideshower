@@ -11,6 +11,7 @@ struct SlideshowView: View {
     let slideshowDelay: Double
     let randomOrder: Bool
     let loopSlideshow: Bool
+    let useFadingTransition: Bool
 
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
@@ -25,7 +26,10 @@ struct SlideshowView: View {
                 images[currentIndex].image
                     .resizable()
                     .scaledToFit()
+                    .id(currentIndex)
                     .edgesIgnoringSafeArea(.all)
+                    .transition(.asymmetric(insertion: .opacity, removal: .opacity))
+                    .animation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil, value: currentIndex)
             }
         }
         .onAppear {
@@ -64,32 +68,46 @@ struct SlideshowView: View {
     private func startRandomSlideshow() {
         guard isSlideshowRunning else { return }
         
-        let queue = DispatchQueue.global(qos: .background)
-        queue.asyncAfter(deadline: .now() + slideshowDelay) {
-            guard self.isSlideshowRunning else { return }
-            
-            if !self.shuffledIndices.isEmpty {
-                self.currentIndex = self.shuffledIndices.removeFirst()
+        DispatchQueue.main.asyncAfter(deadline: .now() + slideshowDelay) {
+            withAnimation(self.useFadingTransition ? .easeInOut(duration: 1.0) : nil) {
+                // Proceed with the next image if there are images left in the shuffledIndices
+                if !self.shuffledIndices.isEmpty {
+                    self.currentIndex = self.shuffledIndices.removeFirst()
+                } else {
+                    // If there are no images left and looping is enabled, reshuffle and start over
+                    if self.loopSlideshow {
+                        self.shuffledIndices = Array(0..<self.images.count).shuffled()
+                        self.currentIndex = self.shuffledIndices.removeFirst()
+                    } else {
+                        // If not looping, stop the slideshow
+                        self.isSlideshowRunning = false
+                    }
+                }
+            }
+            // If the slideshow is still running, continue to the next image after a delay
+            if self.isSlideshowRunning {
                 self.startRandomSlideshow()
             }
         }
     }
+    
 
     private func startSlideshow() {
         guard isSlideshowRunning else { return }
         
-        let queue = DispatchQueue.global(qos: .background)
-        queue.asyncAfter(deadline: .now() + slideshowDelay) {
-            guard self.isSlideshowRunning else { return }
-            
-            if self.currentIndex < self.images.count - 1 {
-                self.currentIndex += 1
-            } else {
-                if self.loopSlideshow {
-                    self.currentIndex = 0
+        DispatchQueue.main.asyncAfter(deadline: .now() + slideshowDelay) {
+            withAnimation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil) {
+                if self.currentIndex < self.images.count - 1 {
+                    self.currentIndex += 1
+                } else {
+                    if self.loopSlideshow {
+                        self.currentIndex = 0
+                    }
                 }
             }
-            self.startSlideshow()
+            if self.isSlideshowRunning {
+                self.startSlideshow()
+            }
         }
     }
 

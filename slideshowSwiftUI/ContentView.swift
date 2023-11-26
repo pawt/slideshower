@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var isHovered = false
     @State private var loopSlideshow = false
     @State private var isInfoVisible = false
+    @State private var useFadingTransition = false
     
     var body: some View {
     
@@ -141,22 +142,33 @@ struct ContentView: View {
                                             .font(.headline)
                                             .padding()
                                         HStack {
-                                            Text("Random slideshow order")
+                                            Text("Delay")
                                                 .fontWeight(.bold)
-                                            Text("- if enabled the files will be shown in a random order.")
+                                            Text("- sets the timing between consecutive photos.")
+                                        }
+                                        HStack {
+                                            Text("Shuffle mode")
+                                                .fontWeight(.bold)
+                                            Text("- if enabled the photos will be shown in a shuffle mode.")
+                                        }
+                                        HStack {
+                                            Text("Fading transition")
+                                                .fontWeight(.bold)
+                                            Text("- if enabled there will be a fading transition between photos.")
                                         }
                                         HStack {
                                             Text("Loop slideshow")
                                                 .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                                             Text("- if enabled the slideshow will not terminate itself.")
                                         }
+
                                     }
                                     .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
                                 })
                             }
                             .padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
                             HStack {
-                                Text("Slideshow delay (in sec):")
+                                Text("Delay between photos (in sec):")
                                 Spacer()
                                 TextField("Enter delay", text: $delayInput)
                                     .frame(width: 60)
@@ -176,11 +188,17 @@ struct ContentView: View {
                             }
                             .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                             HStack {
+                                Text("Fading transition:")
+                                Spacer()
+                                Toggle("", isOn: $useFadingTransition)
+                            }
+                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
+                            HStack {
                                 Text("Loop slideshow:")
                                 Spacer()
                                 Toggle("", isOn: $loopSlideshow)
                             }
-                            .padding(.init(top: 0, leading: 10, bottom: 30, trailing: 10))
+                            .padding(.init(top: 0, leading: 10, bottom: 20, trailing: 10))
                         }
                         .padding(0)
                     }
@@ -311,7 +329,8 @@ struct ContentView: View {
             images: images,
             slideshowDelay: slideshowDelay,
             randomOrder: randomOrder,
-            loopSlideshow: loopSlideshow
+            loopSlideshow: loopSlideshow,
+            useFadingTransition: useFadingTransition
         )
 
         window.contentView = NSHostingView(rootView: slideshowView)
