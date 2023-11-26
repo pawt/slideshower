@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DE0E235E2B0DF9BF00375A73 /* KeyPressHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE0E235D2B0DF9BF00375A73 /* KeyPressHandlingView.swift */; };
+		DE36F2A02B1383EE005443F4 /* Countly in Frameworks */ = {isa = PBXBuildFile; productRef = DE36F29F2B1383EE005443F4 /* Countly */; };
 		DE658D0E2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D0D2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift */; };
 		DE658D102AD6B0BE0006A5EE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D0F2AD6B0BE0006A5EE /* ContentView.swift */; };
 		DE658D122AD6B0BE0006A5EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE658D112AD6B0BE0006A5EE /* Assets.xcassets */; };
@@ -34,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE36F2A02B1383EE005443F4 /* Countly in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +98,9 @@
 			dependencies = (
 			);
 			name = "Slideshower for macOS";
+			packageProductDependencies = (
+				DE36F29F2B1383EE005443F4 /* Countly */,
+			);
 			productName = slideshowSwiftUI;
 			productReference = DE658D0A2AD6B0BE0006A5EE /* Slideshower for macOS.app */;
 			productType = "com.apple.product-type.application";
@@ -124,6 +129,9 @@
 				Base,
 			);
 			mainGroup = DE658D012AD6B0BE0006A5EE;
+			packageReferences = (
+				DE36F29E2B1383EE005443F4 /* XCRemoteSwiftPackageReference "countly-sdk-ios" */,
+			);
 			productRefGroup = DE658D0B2AD6B0BE0006A5EE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -373,6 +381,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DE36F29E2B1383EE005443F4 /* XCRemoteSwiftPackageReference "countly-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Countly/countly-sdk-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 23.8.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DE36F29F2B1383EE005443F4 /* Countly */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DE36F29E2B1383EE005443F4 /* XCRemoteSwiftPackageReference "countly-sdk-ios" */;
+			productName = Countly;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DE658D022AD6B0BE0006A5EE /* Project object */;
 }

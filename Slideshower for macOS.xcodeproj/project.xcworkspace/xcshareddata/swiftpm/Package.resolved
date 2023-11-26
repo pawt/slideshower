@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "countly-sdk-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Countly/countly-sdk-ios.git",
+      "state" : {
+        "revision" : "f4c33c45ac761df6fccf525444f4a4db885a78ae",
+        "version" : "23.8.3"
+      }
+    }
+  ],
+  "version" : 2
+}
