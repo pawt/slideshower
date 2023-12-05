@@ -23,8 +23,10 @@ struct ContentView: View {
     @State private var isLoading = false
     @State private var isHovered = false
     @State private var loopSlideshow = false
-    @State private var isInfoVisible = false
     @State private var useFadingTransition = false
+    
+    @State private var isInfoVisible = false
+    @State private var isVersionPopoverPresented = false
     
 //   @State private var isSlideshowRunning = false
     
@@ -37,16 +39,16 @@ struct ContentView: View {
                     ZStack {
                         if !images.isEmpty {
                             ImageView(identifiableImages: images)
-                                .frame(minHeight: 500)
+                                .frame(minHeight: 600)
                                 .background(Color.white)
                         }
                         if isLoading {
                             ProgressView("Loading Images...")
-                                .frame(maxWidth: .infinity, minHeight: 500)
+                                .frame(maxWidth: .infinity, minHeight: 600)
                                 .background(Color.white)
                         } else if images.isEmpty {
                             Color.white // Set the background color of the VStack
-                                .frame(minHeight: 500)
+                                .frame(minHeight: 600)
                             Image("slideshower_logo")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
@@ -59,16 +61,16 @@ struct ContentView: View {
                                 .offset(y: 100)
                         }
                     }
-                    .frame(height: 500) // Set the initial height of the scrollable panel
+                    .frame(minHeight: 600) // Set the initial height of the scrollable panel
                 }
             }
             
 
             HStack(alignment: .top, spacing: 0){
-                
+                Spacer()
                 VStack {
                     VStack(alignment: .center) {
-                        Text("Please add files")
+                        Text("Please add photos")
                             .font(.title2)
                             .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
                     }
@@ -105,7 +107,7 @@ struct ContentView: View {
                             .shadow(radius: 5)
                             .padding()
                             .background(RoundedRectangle(cornerRadius:8).fill(Color.blue))
-                            .frame(minWidth: 100)
+//                            .frame(minWidth: 50)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { inside in
@@ -116,13 +118,11 @@ struct ContentView: View {
                     .alert(isPresented: $showPhotoCounterInfo, content: {
                         Alert(
                             title: Text("\(selectedFileNames.count) files successfully added!"),
-                            //message: Text("\(selectedFileNames.count) files have been added."),
                             dismissButton: .default(Text("OK"))
                         )
                     })
                 }
-                
-                Spacer()
+                .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 50))
                 
                 GroupBox(label: Text("Settings")
                     .font(.title2)
@@ -206,9 +206,7 @@ struct ContentView: View {
                         .padding(0)
                     }
                     .frame(maxWidth: 300)
-                
-
-                Spacer()
+            
 
                 VStack() {
                     Text("Run slideshow")
@@ -225,7 +223,7 @@ struct ContentView: View {
                         Text("Start").font(.system(size: 13))
                             .foregroundStyle(Color.white)
                             .shadow(radius: 5)
-                            .padding(.init(top: 16, leading: 35, bottom: 16, trailing: 35))
+                            .padding(.init(top: 16, leading: 40, bottom: 16, trailing: 40))
                             .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 0.295, saturation: 1.0, brightness: 0.68)))
                             .frame(minWidth: 100)
 //                            .disabled(isSlideshowRunning)
@@ -252,7 +250,7 @@ struct ContentView: View {
                         Text("Stop").font(.system(size: 13))
                             .foregroundStyle(Color.white)
                             .shadow(radius: 5)
-                            .padding(.init(top: 16, leading: 35, bottom: 16, trailing: 35))
+                            .padding(.init(top: 16, leading: 40, bottom: 16, trailing: 40))
                             .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 1.0, saturation: 0.7, brightness: 0.8)))
                             .frame(minWidth: 100)
 //                            .disabled(isSlideshowRunning)
@@ -273,9 +271,12 @@ struct ContentView: View {
                                .background(Color.yellow.opacity(0.2))
                                .cornerRadius(10)
                                .frame(maxWidth:200)
-
                         }
                 }
+                .padding(.leading, 60)
+                
+                Spacer()
+
             }
             .padding(.bottom, 40)
             .padding(.horizontal, 40.0)
@@ -285,8 +286,6 @@ struct ContentView: View {
                     NSCursor.arrow.set()
                 }
             }
-            
-
             
             
             Spacer()
@@ -306,10 +305,32 @@ struct ContentView: View {
                                         }
                                     }
                             Spacer()
-
-                            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
+                        
+                            
+                            Label("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")", systemImage: "info.circle")
                                 .font(.caption)
-                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 0))
+                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                .onTapGesture {
+                                    self.isVersionPopoverPresented = true
+                                }
+                                .onHover { hovering in
+                                    if hovering {
+                                        NSCursor.pointingHand.push()
+                                    } else {
+                                        NSCursor.pop()
+                                    }
+                                }
+                                .popover(isPresented: $isVersionPopoverPresented) {
+                                    VStack {
+                                        Text("Slideshower version")
+                                            .font(.headline)
+                                            .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
+                                        Text("Go to www.slideshower.com to see the latest version available.")
+                                            .padding()
+                                    }
+                                    .padding(10)
+                                    .frame(width: 400)
+                                }
                             
                             Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
                                 .font(.caption)
@@ -321,17 +342,8 @@ struct ContentView: View {
                                             NSCursor.pop()
                                         }
                                     }
-                            
-
-                            
-                            
-                            
-
                         }
-            
         }
-        
-
     }
     
     func addImagesFromDirectory(_ directoryURL: URL, completion: @escaping () -> Void) {

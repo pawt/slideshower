@@ -6,9 +6,6 @@
 //
 import SwiftUI
 
-extension Notification.Name {
-    static let stopSlideshowNotification = Notification.Name("stopSlideshowNotification")
-}
 
 struct SlideshowView: View {
     @EnvironmentObject var slideshowManager: SlideshowManager
