@@ -7,11 +7,13 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import Countly
+import Foundation
 
 struct ContentView: View {
     @State private var images: [IdentifiableImage] = []
     @State private var selectedFileNames: [String] = []
-    @State private var slideshowDelay: Double = 5.0
+    @State private var slideshowDelay: Double = 3.0
     @State private var delayInput: String = "3"
     @State private var randomOrder = false
     @State private var showAlert = false
@@ -21,6 +23,8 @@ struct ContentView: View {
     @State private var loopSlideshow = false
     @State private var isInfoVisible = false
     @State private var useFadingTransition = false
+    
+    @State private var isSlideshowRunning = false
     
     var body: some View {
     
@@ -59,15 +63,15 @@ struct ContentView: View {
             }
             
 
-            HStack(alignment: .top){
+            HStack(alignment: .top, spacing: 0){
                 
-                Spacer()
+                
                 
                 VStack {
                     VStack(alignment: .center) {
                         Text("Please add files")
                             .font(.title2)
-                            .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 20))
+                            .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
                     }
                     
                     Button(action: {
@@ -109,7 +113,7 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
-                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 20))
+                    .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .alert(isPresented: $showPhotoCounterInfo, content: {
                         Alert(
                             title: Text("\(selectedFileNames.count) files successfully added!"),
@@ -123,7 +127,7 @@ struct ContentView: View {
                 
                 GroupBox(label: Text("Settings")
                     .font(.title2)
-                    .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 20))
+                    .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
                     .frame(maxWidth: .infinity, alignment: .center)) {
                         VStack(alignment: .leading) {
                             HStack() {
@@ -204,8 +208,8 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: 300)
                 
+
                 Spacer()
-                
 
                 VStack() {
                     Text("Run slideshow")
@@ -225,6 +229,7 @@ struct ContentView: View {
                             .padding(.init(top: 16, leading: 35, bottom: 16, trailing: 35))
                             .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 0.295, saturation: 1.0, brightness: 0.68)))
                             .frame(minWidth: 100)
+//                            .disabled(isSlideshowRunning)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { inside in
@@ -239,15 +244,48 @@ struct ContentView: View {
                             dismissButton: .default(Text("OK"))
                         )
                     }
+                    .disabled(isSlideshowRunning) // Disable the button if the slideshow is running
+                    
+                    if (isSlideshowRunning) {
+                        Label("Slideshow is running. Stop it to start another one.", systemImage: "exclamationmark.triangle")
+                               .foregroundColor(Color.red)
+                               .font(.caption)
+                               .padding()
+                               .background(Color.yellow.opacity(0.2))
+                               .cornerRadius(10)
+                               .frame(maxWidth:300, alignment: .center)
+                    }
                 }
-                Spacer()
             }
             .padding(.bottom, 40)
+            .padding(.horizontal, 40.0)
+            .padding(.trailing, 0)
             .onChange(of: isHovered) { _ in
                 if !isHovered {
                     NSCursor.arrow.set()
                 }
             }
+            
+
+            
+            
+            Spacer()
+                        
+                        HStack {
+                            Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
+                                .font(.caption)
+                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 0))
+                            
+                            Spacer()
+                            
+                            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
+                                .font(.caption)
+                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
+                            
+                            
+                            
+
+                        }
             
         }
         
@@ -300,6 +338,34 @@ struct ContentView: View {
 
     
     func runSlideshow() {
+        
+        isSlideshowRunning = true
+        
+        // Assuming 'images' is your array of IdentifiableImage
+        let slideshowSize = images.count
+        let slideshowDelay = slideshowDelay
+        let loopEnabled = loopSlideshow
+        let shuffleEnabled = randomOrder
+        let fadingEnabled = useFadingTransition
+        let sessionID = UUID().uuidString
+        
+        // Key for the event
+        let key = "slideshowStarted"
+
+        // Count for the event
+        let count: UInt = 1
+
+        // Segmentation for the event
+        let segmentation: [String : String] = ["sessionID": sessionID,
+                                               "slideshowSize": String(slideshowSize),
+                                               "slideshowDelay": String(slideshowDelay),
+                                               "loopEnabled": String(loopEnabled),
+                                               "shuffleEnabled": String(shuffleEnabled),
+                                               "fadingEnabled": String(fadingEnabled)]
+
+        // Record the event with segmentation
+        Countly.sharedInstance().recordEvent(key, segmentation: segmentation, count: count)
+
         // Create a separate window for the slideshow
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
@@ -330,7 +396,8 @@ struct ContentView: View {
             slideshowDelay: slideshowDelay,
             randomOrder: randomOrder,
             loopSlideshow: loopSlideshow,
-            useFadingTransition: useFadingTransition
+            useFadingTransition: useFadingTransition,
+            isSlideshowRunning: $isSlideshowRunning
         )
 
         window.contentView = NSHostingView(rootView: slideshowView)
@@ -341,5 +408,6 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            
     }
 }

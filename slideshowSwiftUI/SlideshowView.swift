@@ -16,7 +16,8 @@ struct SlideshowView: View {
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
     @State private var isMouseOver = false
-    @State private var isSlideshowRunning = true
+    
+    @Binding var isSlideshowRunning: Bool
 
     @Environment(\.presentationMode) var presentationMode
     

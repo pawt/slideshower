@@ -12,12 +12,14 @@ import Countly
 struct slideshowSwiftUIApp: App {
     
     init() {
+        
         // Configuration for Countly
         let config = CountlyConfig()
         config.host = "https://slideshower-211a80ac116b2.flex.countly.com"
         config.appKey = "b45bc8d055233be28efd89ca5cdfec81d0de681d"
         config.features = [CLYFeature.pushNotifications, CLYFeature.crashReporting]
-            
+        config.updateSessionPeriod = 600
+
         // Start Countly with the configuration
         Countly.sharedInstance().start(with: config)
         }
@@ -38,4 +40,6 @@ struct slideshowSwiftUIApp: App {
 //            }
         }
     }
+    
+    
 }
