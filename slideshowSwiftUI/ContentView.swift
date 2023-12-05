@@ -272,11 +272,35 @@ struct ContentView: View {
             Spacer()
                         
                         HStack {
+                            Text("If you like this app")
+                                .font(.caption)
+                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: -5))
+                            Link("support its development.", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
+                                .font(.caption)
+                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                .onHover { hovering in
+                                        if hovering {
+                                            NSCursor.pointingHand.push()
+                                        } else {
+                                            NSCursor.pop()
+                                        }
+                                    }
+                            Spacer()
+
+
                             Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
                                 .font(.caption)
                                 .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 0))
+                                .onHover { hovering in
+                                        if hovering {
+                                            NSCursor.pointingHand.push()
+                                        } else {
+                                            NSCursor.pop()
+                                        }
+                                    }
                             
-                            Spacer()
+                                                        
+                
                             
                             Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
                                 .font(.caption)
