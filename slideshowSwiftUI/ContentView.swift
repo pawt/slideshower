@@ -11,6 +11,8 @@ import Countly
 import Foundation
 
 struct ContentView: View {
+    @EnvironmentObject var slideshowManager: SlideshowManager
+    
     @State private var images: [IdentifiableImage] = []
     @State private var selectedFileNames: [String] = []
     @State private var slideshowDelay: Double = 3.0
@@ -24,7 +26,7 @@ struct ContentView: View {
     @State private var isInfoVisible = false
     @State private var useFadingTransition = false
     
-    @State private var isSlideshowRunning = false
+//   @State private var isSlideshowRunning = false
     
     var body: some View {
     
@@ -53,7 +55,6 @@ struct ContentView: View {
                             Text("Selected photos will appear here")
                                 .fontWeight(.light)
                                 .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                //.foregroundColor(Color(red:189, green:186, blue: 221))
                                 .font(.title2)
                                 .offset(y: 100)
                         }
@@ -64,8 +65,6 @@ struct ContentView: View {
             
 
             HStack(alignment: .top, spacing: 0){
-                
-                
                 
                 VStack {
                     VStack(alignment: .center) {
@@ -244,17 +243,38 @@ struct ContentView: View {
                             dismissButton: .default(Text("OK"))
                         )
                     }
-                    .disabled(isSlideshowRunning) // Disable the button if the slideshow is running
+                    .disabled(slideshowManager.isSlideshowRunning)
                     
-                    if (isSlideshowRunning) {
+                    Button(action: {
+                        slideshowManager.isSlideshowRunning = false
+                    })
+                    {
+                        Text("Stop").font(.system(size: 13))
+                            .foregroundStyle(Color.white)
+                            .shadow(radius: 5)
+                            .padding(.init(top: 16, leading: 35, bottom: 16, trailing: 35))
+                            .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 1.0, saturation: 0.7, brightness: 0.8)))
+                            .frame(minWidth: 100)
+//                            .disabled(isSlideshowRunning)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .onHover { inside in
+                        isHovered = inside
+                        NSCursor.pointingHand.set()
+                    }
+                    .disabled(!slideshowManager.isSlideshowRunning)
+
+                    
+                    if (slideshowManager.isSlideshowRunning) {
                         Label("Slideshow is running. Stop it to start another one.", systemImage: "exclamationmark.triangle")
                                .foregroundColor(Color.red)
                                .font(.caption)
                                .padding()
                                .background(Color.yellow.opacity(0.2))
                                .cornerRadius(10)
-                               .frame(maxWidth:300, alignment: .center)
-                    }
+                               .frame(maxWidth:200)
+
+                        }
                 }
             }
             .padding(.bottom, 40)
@@ -287,10 +307,13 @@ struct ContentView: View {
                                     }
                             Spacer()
 
-
-                            Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
+                            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
                                 .font(.caption)
                                 .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 0))
+                            
+                            Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
+                                .font(.caption)
+                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
                                 .onHover { hovering in
                                         if hovering {
                                             NSCursor.pointingHand.push()
@@ -299,12 +322,7 @@ struct ContentView: View {
                                         }
                                     }
                             
-                                                        
-                
-                            
-                            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
-                                .font(.caption)
-                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
+
                             
                             
                             
@@ -363,7 +381,7 @@ struct ContentView: View {
     
     func runSlideshow() {
         
-        isSlideshowRunning = true
+        slideshowManager.isSlideshowRunning = true
         
         // Assuming 'images' is your array of IdentifiableImage
         let slideshowSize = images.count
@@ -420,13 +438,15 @@ struct ContentView: View {
             slideshowDelay: slideshowDelay,
             randomOrder: randomOrder,
             loopSlideshow: loopSlideshow,
-            useFadingTransition: useFadingTransition,
-            isSlideshowRunning: $isSlideshowRunning
+            useFadingTransition: useFadingTransition
+//            isSlideshowRunning: slideshowManager.isSlideshowRunning
         )
+            .environmentObject(slideshowManager)
 
         window.contentView = NSHostingView(rootView: slideshowView)
         window.makeKeyAndOrderFront(nil)
     }
+    
 }
 
 struct ContentView_Previews: PreviewProvider {

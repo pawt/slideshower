@@ -15,6 +15,7 @@
 		DE658D152AD6B0BE0006A5EE /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DE658D142AD6B0BE0006A5EE /* Preview Assets.xcassets */; };
 		DE658D1D2AD6B0F60006A5EE /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D1C2AD6B0F60006A5EE /* ImageView.swift */; };
 		DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */; };
+		DEFC0CAD2B1F45BB0021E507 /* SlideshowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		DE658D1C2AD6B0F60006A5EE /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowView.swift; sourceTree = "<group>"; };
 		DEF47B342AE7DF9500A9A5DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				DE658D0D2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift */,
 				DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */,
 				DE658D0F2AD6B0BE0006A5EE /* ContentView.swift */,
+				DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */,
 				DE658D1C2AD6B0F60006A5EE /* ImageView.swift */,
 				DE658D112AD6B0BE0006A5EE /* Assets.xcassets */,
 				DE658D162AD6B0BE0006A5EE /* slideshowSwiftUI.entitlements */,
@@ -160,6 +163,7 @@
 			files = (
 				DE0E235E2B0DF9BF00375A73 /* KeyPressHandlingView.swift in Sources */,
 				DE658D1D2AD6B0F60006A5EE /* ImageView.swift in Sources */,
+				DEFC0CAD2B1F45BB0021E507 /* SlideshowManager.swift in Sources */,
 				DE658D102AD6B0BE0006A5EE /* ContentView.swift in Sources */,
 				DE658D0E2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift in Sources */,
 				DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */,
@@ -295,7 +299,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = slideshowSwiftUI/slideshowSwiftUI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -332,7 +336,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = slideshowSwiftUI/slideshowSwiftUI.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

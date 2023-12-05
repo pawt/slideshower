@@ -11,6 +11,9 @@ import Countly
 @main
 struct slideshowSwiftUIApp: App {
     
+    // Create an instance of SlideshowManager
+    var slideshowManager = SlideshowManager()
+    
     init() {
         
         // Configuration for Countly
@@ -29,6 +32,7 @@ struct slideshowSwiftUIApp: App {
         WindowGroup {
             ContentView()
                 .frame(minWidth: 800, minHeight: 800)
+                .environmentObject(slideshowManager)
         }
         .windowResizability(.contentSize)
         .commands {

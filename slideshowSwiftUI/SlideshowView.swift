@@ -6,7 +6,13 @@
 //
 import SwiftUI
 
+extension Notification.Name {
+    static let stopSlideshowNotification = Notification.Name("stopSlideshowNotification")
+}
+
 struct SlideshowView: View {
+    @EnvironmentObject var slideshowManager: SlideshowManager
+    
     let images: [IdentifiableImage]
     let slideshowDelay: Double
     let randomOrder: Bool
@@ -16,8 +22,6 @@ struct SlideshowView: View {
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
     @State private var isMouseOver = false
-    
-    @Binding var isSlideshowRunning: Bool
 
     @Environment(\.presentationMode) var presentationMode
     
@@ -35,7 +39,7 @@ struct SlideshowView: View {
         }
         .onAppear {
             // Start the slideshow
-            if isSlideshowRunning {
+            if slideshowManager.isSlideshowRunning {
                 if randomOrder {
                     shuffledIndices = Array(0..<images.count).shuffled()
                     startRandomSlideshow()
@@ -57,9 +61,16 @@ struct SlideshowView: View {
             stopSlideshow()
             NotificationCenter.default.removeObserver(self)
         }
+        .onReceive(slideshowManager.$isSlideshowRunning) { isRunning in
+            if !isRunning {
+                print("Button STOP pressed.")
+                stopSlideshow()
+            }
+        }
         
         KeyPressHandlingView { event in
             if event.keyCode == 53 { // 53 is the key code for ESC
+                print("ESC key pressed.")
                 stopSlideshow() // Call the stopSlideshow function
             }
         }
@@ -67,26 +78,30 @@ struct SlideshowView: View {
     }
     
     private func startRandomSlideshow() {
-        guard isSlideshowRunning else { return }
+        guard slideshowManager.isSlideshowRunning else { return }
+        
+        // Shuffle the indices immediately and set the first photo
+        shuffledIndices = Array(0..<images.count).shuffled()
+        currentIndex = shuffledIndices.removeFirst()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + slideshowDelay) {
             withAnimation(self.useFadingTransition ? .easeInOut(duration: 1.0) : nil) {
                 // Proceed with the next image if there are images left in the shuffledIndices
                 if !self.shuffledIndices.isEmpty {
-                    self.currentIndex = self.shuffledIndices.removeFirst()
+                    currentIndex = shuffledIndices.removeFirst()
                 } else {
                     // If there are no images left and looping is enabled, reshuffle and start over
                     if self.loopSlideshow {
-                        self.shuffledIndices = Array(0..<self.images.count).shuffled()
-                        self.currentIndex = self.shuffledIndices.removeFirst()
+                        shuffledIndices = Array(0..<images.count).shuffled()
+                        currentIndex = shuffledIndices.removeFirst()
                     } else {
                         // If not looping, stop the slideshow
-                        self.isSlideshowRunning = false
+                        slideshowManager.isSlideshowRunning = false
                     }
                 }
             }
             // If the slideshow is still running, continue to the next image after a delay
-            if self.isSlideshowRunning {
+            if slideshowManager.isSlideshowRunning {
                 self.startRandomSlideshow()
             }
         }
@@ -94,7 +109,7 @@ struct SlideshowView: View {
     
 
     private func startSlideshow() {
-        guard isSlideshowRunning else { return }
+        guard slideshowManager.isSlideshowRunning else { return }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + slideshowDelay) {
             withAnimation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil) {
@@ -106,16 +121,22 @@ struct SlideshowView: View {
                     }
                 }
             }
-            if self.isSlideshowRunning {
+            if slideshowManager.isSlideshowRunning {
                 self.startSlideshow()
             }
         }
     }
 
     
+    
     // Function to stop the slideshow
     private func stopSlideshow() {
-        isSlideshowRunning = false
+        print("Stopping the slideshow.")
+        if slideshowManager.isSlideshowRunning {
+            slideshowManager.isSlideshowRunning = false
+        }
         presentationMode.wrappedValue.dismiss()
     }
+    
+    
 }
