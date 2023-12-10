@@ -28,27 +28,44 @@ struct ContentView: View {
     @State private var isInfoVisible = false
     @State private var isVersionPopoverPresented = false
     
-//   @State private var isSlideshowRunning = false
+    @State private var progress = 0.0
+    @State private var totalImagesToLoad = 0.0
+    
+    // Determines if the thumbnails should be displayed
+    private var shouldDisplayThumbnails: Bool {
+        return images.count <= 50
+    }
     
     var body: some View {
-    
+        
         VStack() {
             
             ScrollView(.vertical, showsIndicators: true) {
                 VStack() {
                     ZStack {
-                        if !images.isEmpty {
+                        if shouldDisplayThumbnails {
+                            if !images.isEmpty {
                             ImageView(identifiableImages: images)
-                                .frame(minHeight: 600)
+                                .frame(minHeight: 500)
                                 .background(Color.white)
+                            }
+                        } else {
+                            // A new view that only displays filenames
+                            List(images) { image in
+                                Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                            }
                         }
                         if isLoading {
-                            ProgressView("Loading Images...")
-                                .frame(maxWidth: .infinity, minHeight: 600)
-                                .background(Color.white)
+//                            ProgressView("Loading Images...")
+//                                .frame(maxWidth: .infinity, minHeight: 600)
+//                                .background(Color.white)
+                            ProgressView(value: progress, total: totalImagesToLoad)
+                                .progressViewStyle(LinearProgressViewStyle())
+                                .frame(maxWidth: .infinity) // Makes the progress bar wider
+                                .padding(100) // Adds some padding around the progress bar
                         } else if images.isEmpty {
                             Color.white // Set the background color of the VStack
-                                .frame(minHeight: 600)
+                                .frame(minHeight: 500)
                             Image("slideshower_logo")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
@@ -61,7 +78,7 @@ struct ContentView: View {
                                 .offset(y: 100)
                         }
                     }
-                    .frame(minHeight: 600) // Set the initial height of the scrollable panel
+                    .frame(minHeight: 500) // Set the initial height of the scrollable panel
                 }
             }
             
@@ -204,6 +221,26 @@ struct ContentView: View {
                             .padding(.init(top: 0, leading: 10, bottom: 20, trailing: 10))
                         }
                         .padding(0)
+                        
+                        Divider()
+                            .padding(5)
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "pause.circle")
+                                .foregroundColor(.secondary)
+                            Text("SPACEBAR pauses the slideshow.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        HStack(spacing: 8) {
+                            Image(systemName: "escape")
+                                .foregroundColor(.secondary)
+                            Text("ESC quits the slideshow.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
                     }
                     .frame(maxWidth: 300)
             
@@ -278,7 +315,7 @@ struct ContentView: View {
                 Spacer()
 
             }
-            .padding(.bottom, 40)
+            .padding(.bottom, 20)
             .padding(.horizontal, 40.0)
             .padding(.trailing, 0)
             .onChange(of: isHovered) { _ in
@@ -367,28 +404,32 @@ struct ContentView: View {
         
     
     func loadImages(from urls: [URL], completion: @escaping () -> Void) {
-        isLoading = true
-        
-        DispatchQueue.global(qos: .background).async {
-            var newImages = [IdentifiableImage]()
-            var newFileNames = [String]()
-            
-            for url in urls {
-                if let nsImage = NSImage(contentsOf: url) {
-                    let fileName = url.lastPathComponent
-                    newFileNames.append(fileName)
-                    newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage)))
+            isLoading = true
+            totalImagesToLoad = Double(urls.count)
+
+            DispatchQueue.global(qos: .background).async {
+                var newImages = [IdentifiableImage]()
+                
+                for (index, url) in urls.enumerated() {
+                    if let nsImage = NSImage(contentsOf: url) {
+                        let fileName = url.lastPathComponent
+                        // Create the image and append it to your array
+                        newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage), filename: fileName))
+                        
+                        // Update progress on the main thread
+                        DispatchQueue.main.async {
+                            self.progress = Double(index + 1)
+                        }
+                    }
+                }
+                
+                DispatchQueue.main.async {
+                    self.images.append(contentsOf: newImages)
+                    self.isLoading = false
+                    completion()
                 }
             }
-            
-            DispatchQueue.main.async {
-                self.images.append(contentsOf: newImages)
-                self.selectedFileNames.append(contentsOf: newFileNames)
-                self.isLoading = false
-                completion()
-            }
         }
-    }
 
 
     

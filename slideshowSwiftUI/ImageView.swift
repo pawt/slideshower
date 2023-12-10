@@ -10,6 +10,7 @@ import SwiftUI
 struct IdentifiableImage: Identifiable {
     var id = UUID()
     var image: Image
+    var filename: String
 }
 
 struct ImageView: View {
