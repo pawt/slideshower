@@ -30,6 +30,8 @@ struct ContentView: View {
     
     @State private var progress = 0.0
     @State private var totalImagesToLoad = 0.0
+    @State private var totalPhotosAdded = 0
+
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
@@ -40,45 +42,80 @@ struct ContentView: View {
         
         VStack() {
             
-            ScrollView(.vertical, showsIndicators: true) {
-                VStack() {
-                    ZStack {
-                        if shouldDisplayThumbnails {
-                            if !images.isEmpty {
-                            ImageView(identifiableImages: images)
-                                .frame(minHeight: 500)
-                                .background(Color.white)
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView(.vertical, showsIndicators: true) {
+                    VStack() {
+                        ZStack {
+                            if shouldDisplayThumbnails {
+                                if !images.isEmpty {
+                                    ImageView(identifiableImages: images)
+                                        .frame(minHeight: 550)
+                                        .background(Color.white)
+                                }
+                            } else {
+                                // A new view that only displays filenames
+                                List(images) { image in
+                                    Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                                }
                             }
-                        } else {
-                            // A new view that only displays filenames
-                            List(images) { image in
-                                Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                            
+                            if (isLoading && totalPhotosAdded==0) {
+
+                                    Color.white // Set the background color of the VStack
+                                        .frame(minHeight: 550)
+                                    ProgressView(value: progress, total: totalImagesToLoad)
+                                        .progressViewStyle(LinearProgressViewStyle())
+                                        .frame(maxWidth: .infinity) // Makes the progress bar wider
+                                        .padding(100) // Adds some padding around the progress bar
+ 
+                            }
+                            else if isLoading {
+                                VStack {
+                                    Text("Loading Photos...")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                        .padding(.top, 20)
+                                    ProgressView(value: progress, total: totalImagesToLoad)
+                                        .progressViewStyle(LinearProgressViewStyle())
+                                        .frame(maxWidth: 400)
+                                        .padding(20)
+                                }
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10) // Rounded rectangle background
+                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5) // Light grey border
+                                        .background(Color.white) // White fill for the rounded rectangle
+                                )
+                                .padding(.init(top: 20, leading: 20, bottom: 20, trailing: 20))
+                            } else if images.isEmpty {
+                                Color.white // Set the background color of the VStack
+                                    .frame(minHeight: 550)
+                                Image("slideshower_logo")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width:300)
+                                    .opacity(0.5)
+                                Text("Selected photos will appear here")
+                                    .fontWeight(.light)
+                                    .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
+                                    .font(.title2)
+                                    .offset(y: 100)
                             }
                         }
-                        if isLoading {
-//                            ProgressView("Loading Images...")
-//                                .frame(maxWidth: .infinity, minHeight: 600)
-//                                .background(Color.white)
-                            ProgressView(value: progress, total: totalImagesToLoad)
-                                .progressViewStyle(LinearProgressViewStyle())
-                                .frame(maxWidth: .infinity) // Makes the progress bar wider
-                                .padding(100) // Adds some padding around the progress bar
-                        } else if images.isEmpty {
-                            Color.white // Set the background color of the VStack
-                                .frame(minHeight: 500)
-                            Image("slideshower_logo")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width:300)
-                                .opacity(0.5)
-                            Text("Selected photos will appear here")
-                                .fontWeight(.light)
-                                .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                .font(.title2)
-                                .offset(y: 100)
-                        }
+                        .frame(minHeight: 550) // Set the initial height of the scrollable panel
                     }
-                    .frame(minHeight: 500) // Set the initial height of the scrollable panel
+                }
+                Button(action: removeAllImages) {
+                    Image(systemName: "trash")
+                        .padding(.init(top: 5, leading: 7, bottom: 5, trailing: 0))
+
+                }
+                .buttonStyle(BorderedButtonStyle())
+                .padding(.trailing, 25)
+                .padding(.bottom, 15)
+                .help("Delete all added photos")
+                .onHover { inside in
+                    isHovered = inside
+                    NSCursor.pointingHand.set()
                 }
             }
             
@@ -87,7 +124,7 @@ struct ContentView: View {
                 Spacer()
                 VStack {
                     VStack(alignment: .center) {
-                        Text("Please add photos")
+                        Text("Add photos")
                             .font(.title2)
                             .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
                     }
@@ -127,20 +164,31 @@ struct ContentView: View {
                             .shadow(radius: 5)
                             .padding()
                             .background(RoundedRectangle(cornerRadius:8).fill(Color.blue))
-//                            .frame(minWidth: 50)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { inside in
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
-                    .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
                     .alert(isPresented: $showPhotoCounterInfo, content: {
                         Alert(
-                            title: Text("\(selectedFileNames.count) files successfully added!"),
+                            title: Text("\(selectedFileNames.count) photos added"),
                             dismissButton: .default(Text("OK"))
                         )
                     })
+                    
+                    Divider()
+                        .padding(5)
+                    
+                    HStack(spacing: 8) {
+                        Image(systemName: "photo.fill")
+                            .foregroundColor(.secondary)
+                        Text("Total photos added: \(totalPhotosAdded)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    
                 }
                 .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 50))
                 
@@ -407,37 +455,49 @@ struct ContentView: View {
         
     
     func loadImages(from urls: [URL], completion: @escaping () -> Void) {
-        isLoading = true
-        totalImagesToLoad = Double(urls.count)
+        
+        // Reset progress and update totalImagesToLoad
+        DispatchQueue.main.async {
+            self.progress = 0
+            self.totalImagesToLoad = Double(urls.count)
+            self.isLoading = true
+        }
         
         DispatchQueue.global(qos: .background).async {
             var newImages = [IdentifiableImage]()
             var newFileNames = [String]()
             
-            for (index, url) in urls.enumerated() {
+            for url in urls {
                 if let nsImage = NSImage(contentsOf: url) {
                     let fileName = url.lastPathComponent
                     // Create the image and append it to your array
                     newFileNames.append(fileName)
-                    
                     newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage), filename: fileName))
                     
                     // Update progress on the main thread
                     DispatchQueue.main.async {
-                        self.progress = Double(index + 1)
+                        self.progress += 1 // Increment progress for each image
                     }
+                    
                 }
             }
             
             DispatchQueue.main.async {
                 self.images.append(contentsOf: newImages)
                 self.selectedFileNames.append(contentsOf: newFileNames)
+                self.totalPhotosAdded += newImages.count
                 self.isLoading = false
                 completion()
             }
+
         }
     }
 
+    func removeAllImages() {
+        totalPhotosAdded = 0
+        images.removeAll()
+        selectedFileNames.removeAll()
+    }
 
     
     func runSlideshow() {

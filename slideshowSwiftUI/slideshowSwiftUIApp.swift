@@ -31,7 +31,7 @@ struct slideshowSwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .frame(minWidth: 800, minHeight: 800)
+                .frame(minWidth: 800, minHeight: 850)
                 .environmentObject(slideshowManager)
         }
         .windowResizability(.contentSize)
