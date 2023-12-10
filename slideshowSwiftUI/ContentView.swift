@@ -35,7 +35,7 @@ struct ContentView: View {
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
-        return images.count <= 50
+        return images.count <= 100
     }
     
     var body: some View {
@@ -46,32 +46,37 @@ struct ContentView: View {
                 ScrollView(.vertical, showsIndicators: true) {
                     VStack() {
                         ZStack {
-                            if shouldDisplayThumbnails {
-                                if !images.isEmpty {
-                                    ImageView(identifiableImages: images)
-                                        .frame(minHeight: 550)
-                                        .background(Color.white)
-                                }
-                            } else {
-                                // A new view that only displays filenames
+                            Color.white.frame(minHeight: 550)
+                            
+                            // Display thumbnails or filenames
+                            if shouldDisplayThumbnails && !images.isEmpty {
+                                ImageView(identifiableImages: images)
+                                    .frame(minHeight: 550)
+                            } else if !shouldDisplayThumbnails {
                                 List(images) { image in
                                     Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
                                 }
                             }
                             
-                            if (isLoading && totalPhotosAdded==0) {
-
-                                    Color.white // Set the background color of the VStack
-                                        .frame(minHeight: 550)
+                            // Display the progress view for the first time loading
+                            if isLoading && totalPhotosAdded == 0 {
+                                VStack {
+                                    Text("Loading photos...")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                        .padding(.top, 20)
                                     ProgressView(value: progress, total: totalImagesToLoad)
                                         .progressViewStyle(LinearProgressViewStyle())
-                                        .frame(maxWidth: .infinity) // Makes the progress bar wider
-                                        .padding(100) // Adds some padding around the progress bar
- 
+                                        .frame(maxWidth: 400)
+                                        .padding(20)
+                                }
+                                .background(Color.white)
                             }
+                            
+                            // Display the progress view with border for subsequent loading
                             else if isLoading {
                                 VStack {
-                                    Text("Loading Photos...")
+                                    Text("Loading photos...")
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                         .padding(.top, 20)
@@ -81,27 +86,28 @@ struct ContentView: View {
                                         .padding(20)
                                 }
                                 .background(
-                                    RoundedRectangle(cornerRadius: 10) // Rounded rectangle background
-                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5) // Light grey border
-                                        .background(Color.white) // White fill for the rounded rectangle
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+                                        .background(Color.white)
                                 )
-                                .padding(.init(top: 20, leading: 20, bottom: 20, trailing: 20))
-                            } else if images.isEmpty {
-                                Color.white // Set the background color of the VStack
-                                    .frame(minHeight: 550)
-                                Image("slideshower_logo")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width:300)
-                                    .opacity(0.5)
-                                Text("Selected photos will appear here")
-                                    .fontWeight(.light)
-                                    .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                    .font(.title2)
-                                    .offset(y: 100)
+                                .padding(20)
+                            }
+                            
+                            // Display the placeholder when no images are loaded
+                            else if images.isEmpty {
+                                VStack {
+                                    Image("slideshower_logo")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 300)
+                                        .opacity(0.5)
+                                    Text("Selected photos will appear here")
+                                        .fontWeight(.light)
+                                        .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
+                                        .font(.title2)
+                                }
                             }
                         }
-                        .frame(minHeight: 550) // Set the initial height of the scrollable panel
                     }
                 }
                 Button(action: removeAllImages) {
