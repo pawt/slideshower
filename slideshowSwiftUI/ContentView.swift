@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var slideshowDelay: Double = 3.0
     @State private var delayInput: String = "3"
     @State private var randomOrder = false
+
     @State private var showAlert = false
     @State private var showPhotoCounterInfo = false
     @State private var isLoading = false
@@ -31,6 +32,9 @@ struct ContentView: View {
     @State private var progress = 0.0
     @State private var totalImagesToLoad = 0.0
     @State private var totalPhotosAdded = 0
+    
+    @State private var showErasePhotosAlert = false
+    @State private var confirmDeletePhotos = false
 
     
     // Determines if the thumbnails should be displayed
@@ -46,12 +50,12 @@ struct ContentView: View {
                 ScrollView(.vertical, showsIndicators: true) {
                     VStack() {
                         ZStack {
-                            Color.white.frame(minHeight: 550)
+                            Color.white.frame(minHeight: 500)
                             
                             // Display thumbnails or filenames
                             if shouldDisplayThumbnails && !images.isEmpty {
                                 ImageView(identifiableImages: images)
-                                    .frame(minHeight: 550)
+                                    .frame(minHeight: 500)
                             } else if !shouldDisplayThumbnails {
                                 List(images) { image in
                                     Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
@@ -61,7 +65,7 @@ struct ContentView: View {
                             // Display the progress view for the first time loading
                             if isLoading && totalPhotosAdded == 0 {
                                 VStack {
-                                    Text("Loading photos...")
+                                    Text("Adding photos...")
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                         .padding(.top, 20)
@@ -76,7 +80,7 @@ struct ContentView: View {
                             // Display the progress view with border for subsequent loading
                             else if isLoading {
                                 VStack {
-                                    Text("Loading photos...")
+                                    Text("Adding photos...")
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                         .padding(.top, 20)
@@ -110,24 +114,46 @@ struct ContentView: View {
                         }
                     }
                 }
-                Button(action: removeAllImages) {
+                Button(action: {
+                    // Check if there are any photos added
+                    if !images.isEmpty {
+                        // If there are photos, show the alert
+                        self.showErasePhotosAlert = true}
+                    }
+                    // If there are no photos, do nothing
+                    )
+                {
                     Image(systemName: "trash")
-                        .padding(.init(top: 5, leading: 7, bottom: 5, trailing: 0))
+                        .padding(.init(top: 5, leading: 0, bottom: 5, trailing: 0))
 
                 }
                 .buttonStyle(BorderedButtonStyle())
-                .padding(.trailing, 25)
-                .padding(.bottom, 15)
+                .offset(x:-25, y:-25)
                 .help("Delete all added photos")
                 .onHover { inside in
                     isHovered = inside
                     NSCursor.pointingHand.set()
                 }
+                .alert(isPresented: $showErasePhotosAlert) {
+                    Alert(
+                        title: Text("Confirm Deletion"),
+                        message: Text("Do you really want to remove all added files?"),
+                        primaryButton: .destructive(Text("Yes")) {
+                            // Perform the deletion
+                            confirmDeletePhotos = true
+                            removeAllImages()
+                        },
+                        secondaryButton: .cancel {
+                            // User chose not to delete
+                            confirmDeletePhotos = false
+                        }
+                    )
+                }
             }
             
 
-            HStack(alignment: .top, spacing: 0){
-                Spacer()
+            HStack(alignment: .top){
+                
                 VStack {
                     VStack(alignment: .center) {
                         Text("Add photos")
@@ -184,123 +210,127 @@ struct ContentView: View {
                     })
                     
                     Divider()
-                        .padding(5)
+                        .padding(.init(top: 5, leading: 0, bottom: 5, trailing: 0))
+                        .frame(width:200)
                     
                     HStack(spacing: 8) {
                         Image(systemName: "photo.fill")
                             .foregroundColor(.secondary)
-                        Text("Total photos added: \(totalPhotosAdded)")
+                        Text("Total num of photos added: \(totalPhotosAdded)")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
                     
                     
                 }
-                .padding(.init(top: 0, leading: 0, bottom: 0, trailing: 50))
-                
-                GroupBox(label: Text("Settings")
-                    .font(.title2)
-                    .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
-                    .frame(maxWidth: .infinity, alignment: .center)) {
-                        VStack(alignment: .leading) {
-                            HStack() {
-                                Spacer ()
-                                Button(action: {
-                                    isInfoVisible.toggle()
-                                }) {
-                                    Image(systemName: "questionmark.circle")
-                                        .font(.system(size: 14))
-                                }
-                                .help("Click for more information")
-                                .buttonStyle(PlainButtonStyle())
-                                .popover(isPresented: $isInfoVisible, content: {
-                                    VStack {
-                                        Text("Settings - help")
-                                            .font(.headline)
-                                            .padding()
-                                        HStack {
-                                            Text("Delay")
-                                                .fontWeight(.bold)
-                                            Text("- sets the timing between consecutive photos.")
-                                        }
-                                        HStack {
-                                            Text("Shuffle mode")
-                                                .fontWeight(.bold)
-                                            Text("- if enabled the photos will be shown in a shuffle mode.")
-                                        }
-                                        HStack {
-                                            Text("Fading transition")
-                                                .fontWeight(.bold)
-                                            Text("- if enabled there will be a fading transition between photos.")
-                                        }
-                                        HStack {
-                                            Text("Loop slideshow")
-                                                .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                                            Text("- if enabled the slideshow will not terminate itself.")
-                                        }
-
-                                    }
-                                    .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
-                                })
-                            }
-                            .padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
-                            HStack {
-                                Text("Delay between photos (in sec):")
-                                Spacer()
-                                TextField("Enter delay", text: $delayInput)
-                                    .frame(width: 60)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .multilineTextAlignment(.center)
-                                    .onChange(of: delayInput) { newValue in
-                                        if let delay = Double(newValue) {
-                                            slideshowDelay = delay
-                                        }
-                                    }
-                            }
-                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                            HStack {
-                                Text("Shuffle mode:")
-                                Spacer()
-                                Toggle("", isOn: $randomOrder)
-                            }
-                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                            HStack {
-                                Text("Fading transition:")
-                                Spacer()
-                                Toggle("", isOn: $useFadingTransition)
-                            }
-                            .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                            HStack {
-                                Text("Loop slideshow:")
-                                Spacer()
-                                Toggle("", isOn: $loopSlideshow)
-                            }
-                            .padding(.init(top: 0, leading: 10, bottom: 20, trailing: 10))
-                        }
-                        .padding(0)
-                        
-                        Divider()
-                            .padding(5)
-
-                        HStack(spacing: 8) {
-                            Image(systemName: "pause.circle")
-                                .foregroundColor(.secondary)
-                            Text("SPACEBAR pauses the slideshow.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                        HStack(spacing: 8) {
-                            Image(systemName: "escape")
-                                .foregroundColor(.secondary)
-                            Text("ESC quits the slideshow.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-
-                    }
-                    .frame(maxWidth: 300)
+                .padding(.init(top: 0, leading: 50, bottom: 0, trailing: 0))
+                .frame(width:300)
             
+                
+                VStack {
+                    GroupBox(label: Text("Settings")
+                        .font(.title2)
+                        .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
+                        .frame(maxWidth: .infinity, alignment: .center)) {
+                            VStack(alignment: .leading) {
+                                HStack() {
+                                    Spacer ()
+                                    Button(action: {
+                                        isInfoVisible.toggle()
+                                    }) {
+                                        Image(systemName: "questionmark.circle")
+                                            .font(.system(size: 14))
+                                    }
+                                    .help("Click for more information")
+                                    .buttonStyle(PlainButtonStyle())
+                                    .popover(isPresented: $isInfoVisible, content: {
+                                        VStack {
+                                            Text("Settings - help")
+                                                .font(.headline)
+                                                .padding()
+                                            HStack {
+                                                Text("Delay")
+                                                    .fontWeight(.bold)
+                                                Text("- sets the timing between consecutive photos.")
+                                            }
+                                            HStack {
+                                                Text("Shuffle mode")
+                                                    .fontWeight(.bold)
+                                                Text("- if enabled the photos will be shown in a shuffle mode.")
+                                            }
+                                            HStack {
+                                                Text("Fading transition")
+                                                    .fontWeight(.bold)
+                                                Text("- if enabled there will be a fading transition between photos.")
+                                            }
+                                            HStack {
+                                                Text("Loop slideshow")
+                                                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                                                Text("- if enabled the slideshow will not terminate itself.")
+                                            }
+                                            
+                                        }
+                                        .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
+                                    })
+                                }
+                                .padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
+                                HStack {
+                                    Text("Delay between photos (in sec):")
+                                    Spacer()
+                                    TextField("Enter delay", text: $delayInput)
+                                        .frame(width: 60)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .multilineTextAlignment(.center)
+                                        .onChange(of: delayInput) { newValue in
+                                            if let delay = Double(newValue) {
+                                                slideshowDelay = delay
+                                            }
+                                        }
+                                }
+                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
+                                HStack {
+                                    Text("Shuffle mode:")
+                                    Spacer()
+                                    Toggle("", isOn: $randomOrder)
+                                }
+                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
+                                HStack {
+                                    Text("Fading transition:")
+                                    Spacer()
+                                    Toggle("", isOn: $useFadingTransition)
+                                }
+                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
+                                HStack {
+                                    Text("Loop slideshow:")
+                                    Spacer()
+                                    Toggle("", isOn: $loopSlideshow)
+                                }
+                                .padding(.init(top: 0, leading: 10, bottom: 20, trailing: 10))
+                            }
+                            .padding(0)
+                            
+                            Divider()
+                                .padding(5)
+                            
+                            HStack(spacing: 8) {
+                                Image(systemName: "pause.circle")
+                                    .foregroundColor(.secondary)
+                                Text("SPACEBAR pauses the slideshow.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            HStack(spacing: 8) {
+                                Image(systemName: "escape")
+                                    .foregroundColor(.secondary)
+                                Text("ESC quits the slideshow.")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                        }
+                }
+                .frame(width: 300)
 
                 VStack() {
                     Text("Run slideshow")
@@ -320,7 +350,6 @@ struct ContentView: View {
                             .padding(.init(top: 16, leading: 40, bottom: 16, trailing: 40))
                             .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 0.295, saturation: 1.0, brightness: 0.68)))
                             .frame(minWidth: 100)
-//                            .disabled(isSlideshowRunning)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { inside in
@@ -331,7 +360,7 @@ struct ContentView: View {
                     {
                         Alert(
                             title: Text("No Images Selected"),
-                            message: Text("Please select images before running the slideshow."),
+                            message: Text("Please add images before running the slideshow."),
                             dismissButton: .default(Text("OK"))
                         )
                     }
@@ -347,7 +376,6 @@ struct ContentView: View {
                             .padding(.init(top: 16, leading: 40, bottom: 16, trailing: 40))
                             .background(RoundedRectangle(cornerRadius:8).fill(Color(hue: 1.0, saturation: 0.7, brightness: 0.8)))
                             .frame(minWidth: 100)
-//                            .disabled(isSlideshowRunning)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .onHover { inside in
@@ -359,84 +387,83 @@ struct ContentView: View {
                     
                     if (slideshowManager.isSlideshowRunning) {
                         Label("Slideshow is running. Stop it to start another one.", systemImage: "exclamationmark.triangle")
-                               .foregroundColor(Color.red)
-                               .font(.caption)
-                               .padding()
-                               .background(Color.yellow.opacity(0.2))
-                               .cornerRadius(10)
-                               .frame(maxWidth:200)
-                        }
+                            .foregroundColor(Color.red)
+                            .font(.caption)
+                            .padding()
+                            .background(Color.yellow.opacity(0.2))
+                            .cornerRadius(10)
+                            .frame(maxWidth:200)
+                    }
                 }
-                .padding(.leading, 60)
+                .frame(width:300)
                 
                 Spacer()
 
             }
-            .padding(.bottom, 20)
-            .padding(.horizontal, 40.0)
-            .padding(.trailing, 0)
             .onChange(of: isHovered) { _ in
                 if !isHovered {
                     NSCursor.arrow.set()
                 }
             }
+            .padding(.bottom, 20)
+            .padding(.horizontal)
             
-            
+
             Spacer()
                         
-                        HStack {
-                            Text("If you like this app")
-                                .font(.caption)
-                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: -5))
-                            Link("support its development.", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
-                                .font(.caption)
-                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
-                                .onHover { hovering in
-                                        if hovering {
-                                            NSCursor.pointingHand.push()
-                                        } else {
-                                            NSCursor.pop()
-                                        }
-                                    }
-                            Spacer()
-                        
-                            
-                            Label("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")", systemImage: "info.circle")
-                                .font(.caption)
-                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
-                                .onTapGesture {
-                                    self.isVersionPopoverPresented = true
-                                }
-                                .onHover { hovering in
-                                    if hovering {
-                                        NSCursor.pointingHand.push()
-                                    } else {
-                                        NSCursor.pop()
-                                    }
-                                }
-                                .popover(isPresented: $isVersionPopoverPresented) {
-                                    VStack {
-                                        Text("Slideshower version")
-                                            .font(.headline)
-                                            .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
-                                        Text("Go to www.slideshower.com to see the latest version available.")
-                                            .padding()
-                                    }
-                                    .padding(10)
-                                    .frame(width: 400)
-                                }
-                            
-                            Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
-                                .font(.caption)
-                                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
-                                .onHover { hovering in
-                                        if hovering {
-                                            NSCursor.pointingHand.push()
-                                        } else {
-                                            NSCursor.pop()
-                                        }
-                                    }
+            HStack {
+                Text("If you like this app")
+                    .font(.caption)
+                    .padding(.init(top: 0, leading: 10, bottom: 10, trailing: -5))
+                Link("support its development.", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
+                    .font(.caption)
+                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
                         }
+                    }
+                Spacer()
+                
+                
+                Label("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")", systemImage: "info.circle")
+                    .font(.caption)
+                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                    .onTapGesture {
+                        self.isVersionPopoverPresented = true
+                    }
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+                    .popover(isPresented: $isVersionPopoverPresented) {
+                        VStack {
+                            Text("Slideshower version")
+                                .font(.headline)
+                                .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
+                            Text("Go to www.slideshower.com to see the latest version available.")
+                                .padding()
+                        }
+                        .padding(10)
+                        .frame(width: 400)
+                    }
+                
+                Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
+                    .font(.caption)
+                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
+                    .onHover { hovering in
+                        if hovering {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+            }
         }
     }
     
