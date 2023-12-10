@@ -98,6 +98,9 @@ struct ContentView: View {
                         openPanel.canChooseDirectories = true
                         openPanel.canChooseFiles = true
                         openPanel.allowedContentTypes = [UTType.jpeg, UTType.png, UTType.heic]
+                        
+                        self.selectedFileNames.removeAll() // Reset the file names before adding new ones
+                        
                         if openPanel.runModal() == .OK {
                             let group = DispatchGroup()
                             
@@ -404,32 +407,36 @@ struct ContentView: View {
         
     
     func loadImages(from urls: [URL], completion: @escaping () -> Void) {
-            isLoading = true
-            totalImagesToLoad = Double(urls.count)
-
-            DispatchQueue.global(qos: .background).async {
-                var newImages = [IdentifiableImage]()
-                
-                for (index, url) in urls.enumerated() {
-                    if let nsImage = NSImage(contentsOf: url) {
-                        let fileName = url.lastPathComponent
-                        // Create the image and append it to your array
-                        newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage), filename: fileName))
-                        
-                        // Update progress on the main thread
-                        DispatchQueue.main.async {
-                            self.progress = Double(index + 1)
-                        }
+        isLoading = true
+        totalImagesToLoad = Double(urls.count)
+        
+        DispatchQueue.global(qos: .background).async {
+            var newImages = [IdentifiableImage]()
+            var newFileNames = [String]()
+            
+            for (index, url) in urls.enumerated() {
+                if let nsImage = NSImage(contentsOf: url) {
+                    let fileName = url.lastPathComponent
+                    // Create the image and append it to your array
+                    newFileNames.append(fileName)
+                    
+                    newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage), filename: fileName))
+                    
+                    // Update progress on the main thread
+                    DispatchQueue.main.async {
+                        self.progress = Double(index + 1)
                     }
                 }
-                
-                DispatchQueue.main.async {
-                    self.images.append(contentsOf: newImages)
-                    self.isLoading = false
-                    completion()
-                }
+            }
+            
+            DispatchQueue.main.async {
+                self.images.append(contentsOf: newImages)
+                self.selectedFileNames.append(contentsOf: newFileNames)
+                self.isLoading = false
+                completion()
             }
         }
+    }
 
 
     
