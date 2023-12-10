@@ -14,6 +14,9 @@ struct KeyPressHandlingView: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = KeyPressInterceptingView()
         view.onKeyPress = onKeyPress
+        DispatchQueue.main.async {
+            view.window?.makeFirstResponder(view)
+        }
         return view
     }
 
@@ -27,6 +30,7 @@ struct KeyPressHandlingView: NSViewRepresentable {
 
         // This method is called when the view is about to become the first responder
         override func becomeFirstResponder() -> Bool {
+            NSApp.keyWindow?.makeFirstResponder(self)
             return true
         }
 
