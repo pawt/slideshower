@@ -49,12 +49,13 @@ struct ContentView: View {
     @State private var totalPhotosToBeAdded = 0
     
     @State private var thumbnailsEnabledTreshold = 100
+    @State private var displayThumbnails = true
     
     @State private var activeAlert: ActiveAlert?
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
-        return images.count <= thumbnailsEnabledTreshold
+        return displayThumbnails && images.count <= thumbnailsEnabledTreshold
     }
     
     var body: some View {
@@ -559,27 +560,94 @@ struct ContentView: View {
         }
     }
     
-    // Function to process URLs for both directories and individual files
     func processSelectedUrls(urls: [URL]) {
-        let group = DispatchGroup()
+        var allUrlsToLoad: [URL] = []
+
         for url in urls {
-            group.enter() // Enter the group
             if url.hasDirectoryPath {
-                addImagesFromDirectory(url) {
-                    group.leave() // Leave the group once images are loaded
+                // Add all image URLs from the directory to `allUrlsToLoad`
+                do {
+                    let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+                    allUrlsToLoad += fileURLs.filter {
+                        let fileType = $0.pathExtension.lowercased()
+                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
+                    }
+                } catch {
+                    print("Error reading directory contents: \(error)")
                 }
             } else {
-                loadImages(from: [url]) {
-                    group.leave() // Leave the group once image is loaded
-                }
+                // Add single image URL to `allUrlsToLoad`
+                allUrlsToLoad.append(url)
             }
         }
-        group.notify(queue: .main) {
+
+        // Update totalImagesToLoad for the progress view
+        DispatchQueue.main.async {
+            self.totalImagesToLoad = Double(allUrlsToLoad.count)
+        }
+
+        // Load all images at once
+        loadImages(from: allUrlsToLoad) {
             // This will be called once all images are loaded
             self.activeAlert = .photoCounter
-//            self.showPhotoCounterInfo = true
+            // Check if the threshold is exceeded and update the thumbnail display
+            if self.totalPhotosAdded > self.thumbnailsEnabledTreshold {
+                self.displayThumbnails = false
+            }
         }
     }
+
+    
+    // Function to process URLs for both directories and individual files
+//    func processSelectedUrls(urls: [URL]) {
+//        let group = DispatchGroup()
+//        var totalImagesInBatch = 0
+//        
+//        for url in urls {
+//            group.enter() // Enter the group
+//            if url.hasDirectoryPath {
+//                // Calculate total number of image files in the directory
+//                do {
+//                    let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+//                    let imageFileURLs = fileURLs.filter {
+//                        let fileType = $0.pathExtension.lowercased()
+//                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
+//                    }
+//                    totalImagesInBatch += imageFileURLs.count
+//                } catch {
+//                    print("Error reading directory contents: \(error)")
+//                }
+//            } else {
+//                // If it's not a directory, increment the count if it's an image file
+//                let fileType = url.pathExtension.lowercased()
+//                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
+//                    totalImagesInBatch += 1
+//                }
+//            }
+//        }
+//        
+//        
+//        for url in urls {
+//            if url.hasDirectoryPath {
+//                addImagesFromDirectory(url) {
+//                    group.leave() // Leave the group once images are loaded
+//                }
+//            } else {
+//                loadImages(from: [url]) {
+//                    group.leave() // Leave the group once image is loaded
+//                }
+//            }
+//        }
+//        
+//        group.notify(queue: .main) {
+//            // This will be called once all images are loaded
+//            self.activeAlert = .photoCounter
+//            // Check if the threshold is exceeded and update the thumbnail display
+//            if totalImagesInBatch + self.totalPhotosAdded > self.thumbnailsEnabledTreshold {
+//                self.displayThumbnails = false
+//            }
+//        }
+//    }
     
     func addImagesFromDirectory(_ directoryURL: URL, completion: @escaping () -> Void) {
         let fileManager = FileManager.default
@@ -608,7 +676,7 @@ struct ContentView: View {
         // Reset progress and update totalImagesToLoad
         DispatchQueue.main.async {
             self.progress = 0
-            self.totalImagesToLoad = Double(urls.count)
+//            self.totalImagesToLoad = Double(urls.count)
             self.isLoading = true
         }
         
@@ -635,6 +703,12 @@ struct ContentView: View {
                 self.images.append(contentsOf: newImages)
                 self.selectedFileNames.append(contentsOf: newFileNames)
                 self.totalPhotosAdded += newImages.count
+                
+                // Update displayThumbnails based on the new total
+                if self.totalPhotosAdded <= self.thumbnailsEnabledTreshold {
+                    self.displayThumbnails = true
+                }
+                
                 self.isLoading = false
                 completion()
             }
