@@ -519,18 +519,6 @@ struct ContentView: View {
     // Function to handle the preparation of loading images
     func prepareForLoadingImages(urls: [URL]) {
         
-
-//        totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
-//            if url.hasDirectoryPath {
-//                let fileURLs = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-//                print("Directory: \(url.lastPathComponent), File count: \(fileURLs?.count ?? 0)")
-//                return result + (fileURLs?.count ?? 0)
-//            } else {
-//                return result + 1
-//            }
-//        }
-        
-
         totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
             if url.hasDirectoryPath {
                 do {
@@ -558,11 +546,16 @@ struct ContentView: View {
             }
         }
         
-        if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
-//            showThumbnailAlert = true
-            self.activeAlert = .thumbnailAlert
-        } else {
+        if totalPhotosAdded > thumbnailsEnabledTreshold {
             processSelectedUrls(urls: urls)
+        } else {
+            // Check if adding the new photos will exceed the threshold.
+            if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
+                // Set the active alert to thumbnailAlert
+                activeAlert = .thumbnailAlert
+            } else {
+                processSelectedUrls(urls: urls)
+            }
         }
     }
     
