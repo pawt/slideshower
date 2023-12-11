@@ -87,7 +87,7 @@ struct ContentView: View {
                                 // Display the progress view for the first time loading
                                 if isLoading && totalPhotosAdded == 0 {
                                     VStack {
-                                        Text("Adding photos...")
+                                        Text("Adding \(totalPhotosToBeAdded) photos...")
                                             .font(.headline)
                                             .foregroundColor(.primary)
                                             .padding(.top, 20)
@@ -104,7 +104,7 @@ struct ContentView: View {
                                 // Display the progress view with border for subsequent loading
                                 else if isLoading {
                                     VStack {
-                                        Text("Adding photos...")
+                                        Text("Adding \(totalPhotosToBeAdded) photos...")
                                             .font(.headline)
                                             .foregroundColor(.primary)
                                             .padding(.top, 20)
