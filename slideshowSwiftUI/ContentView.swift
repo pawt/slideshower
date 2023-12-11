@@ -502,8 +502,7 @@ struct ContentView: View {
 //            }
 //        }
         
-        print("totalPhotoAdded: " + String(totalPhotosAdded))
-        print("totalPhotosToBeAdded: " + String(totalPhotosToBeAdded))
+
         totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
             if url.hasDirectoryPath {
                 do {
@@ -530,9 +529,6 @@ struct ContentView: View {
                 }
             }
         }
-        
-        print("Final totalPhotosAdded: \(totalPhotosAdded)")
-        print("Final totalPhotosToBeAdded: \(totalPhotosToBeAdded)")
         
         if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
             showThumbnailAlert = true
