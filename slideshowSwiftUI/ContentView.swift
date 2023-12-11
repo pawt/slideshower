@@ -39,11 +39,12 @@ struct ContentView: View {
     @State private var showThumbnailAlert = false
     @State private var urlsToLoad: [URL] = []
     @State private var totalPhotosToBeAdded = 0
-
+    
+    @State private var thumbnailsEnabledTreshold = 100
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
-        return images.count <= 100
+        return images.count <= thumbnailsEnabledTreshold
     }
     
     var body: some View {
@@ -200,8 +201,6 @@ struct ContentView: View {
                             self.urlsToLoad = openPanel.urls
                             prepareForLoadingImages(urls: openPanel.urls)
                         }
-                        
-                            
                     }) {
                         Text("Select files or a folder").font(.system(size: 13))
                             .foregroundStyle(Color.white)
@@ -214,22 +213,21 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
-
                     .alert(isPresented: $showPhotoCounterInfo, content: {
                         Alert(
                             title: Text("\(selectedFileNames.count) photos added"),
                             dismissButton: .default(Text("OK"))
                         )
                     })
-                    .alert(isPresented: $showThumbnailAlert) {
+                    .alert(isPresented: $showThumbnailAlert, content: {
                         Alert(
-                            title: Text("Large Number of Photos"),
-                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. It's more than 100, so thumbnails will not be displayed."),
+                            title: Text("Important info"),
+                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
                             dismissButton: .default(Text("OK")) {
                                 processSelectedUrls(urls: self.urlsToLoad)
                             }
                         )
-                    }
+                    })
 
                     
                     Divider()
@@ -501,7 +499,7 @@ struct ContentView: View {
             }
         }
         
-        if totalPhotosToBeAdded + totalPhotosAdded > 100 {
+        if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
             showThumbnailAlert = true
         } else {
             processSelectedUrls(urls: urls)
