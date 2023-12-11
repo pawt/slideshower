@@ -490,14 +490,49 @@ struct ContentView: View {
     
     // Function to handle the preparation of loading images
     func prepareForLoadingImages(urls: [URL]) {
+        
+
+//        totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
+//            if url.hasDirectoryPath {
+//                let fileURLs = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+//                print("Directory: \(url.lastPathComponent), File count: \(fileURLs?.count ?? 0)")
+//                return result + (fileURLs?.count ?? 0)
+//            } else {
+//                return result + 1
+//            }
+//        }
+        
+        print("totalPhotoAdded: " + String(totalPhotosAdded))
+        print("totalPhotosToBeAdded: " + String(totalPhotosToBeAdded))
         totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
             if url.hasDirectoryPath {
-                let fileURLs = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-                return result + (fileURLs?.count ?? 0)
+                do {
+                    // Get the content of the directory
+                    let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+                    // Filter out non-image files
+                    let imageFileURLs = fileURLs.filter {
+                        let fileType = $0.pathExtension.lowercased()
+                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
+                    }
+                    print("Directory: \(url.lastPathComponent), Image file count: \(imageFileURLs.count)")
+                    return result + imageFileURLs.count
+                } catch {
+                    print("Error reading contents of directory: \(error)")
+                    return result
+                }
             } else {
-                return result + 1
+                // If it's not a directory, check if it's an image file
+                let fileType = url.pathExtension.lowercased()
+                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
+                    return result + 1
+                } else {
+                    return result
+                }
             }
         }
+        
+        print("Final totalPhotosAdded: \(totalPhotosAdded)")
+        print("Final totalPhotosToBeAdded: \(totalPhotosToBeAdded)")
         
         if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
             showThumbnailAlert = true
