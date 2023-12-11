@@ -130,7 +130,7 @@ struct ContentView: View {
                                 }
                         }
 //                        .border(Color.orange, width: 2)
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         
                     }
 //                    .border(Color.red, width: 1)
