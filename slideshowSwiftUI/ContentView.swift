@@ -10,6 +10,14 @@ import UniformTypeIdentifiers
 import Countly
 import Foundation
 
+enum ActiveAlert: Identifiable {
+    case photoCounter, thumbnailAlert
+    
+    var id: Self {
+        return self
+    }
+}
+
 struct ContentView: View {
     @EnvironmentObject var slideshowManager: SlideshowManager
     
@@ -20,7 +28,7 @@ struct ContentView: View {
     @State private var randomOrder = false
 
     @State private var showAlert = false
-    @State private var showPhotoCounterInfo = false
+    @State private var showPhotoCounterInfo = false // TODO: to remove, not used anymore
     @State private var isLoading = false
     @State private var isHovered = false
     @State private var loopSlideshow = false
@@ -36,11 +44,13 @@ struct ContentView: View {
     @State private var showErasePhotosAlert = false
     @State private var confirmDeletePhotos = false
     
-    @State private var showThumbnailAlert = false
+    @State private var showThumbnailAlert = false // TODO: to remove, not used anymore
     @State private var urlsToLoad: [URL] = []
     @State private var totalPhotosToBeAdded = 0
     
     @State private var thumbnailsEnabledTreshold = 100
+    
+    @State private var activeAlert: ActiveAlert?
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
@@ -213,21 +223,39 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
-                    .alert(isPresented: $showPhotoCounterInfo, content: {
-                        Alert(
-                            title: Text("\(selectedFileNames.count) photos added"),
-                            dismissButton: .default(Text("OK"))
-                        )
-                    })
-                    .alert(isPresented: $showThumbnailAlert, content: {
-                        Alert(
-                            title: Text("Important info"),
-                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
-                            dismissButton: .default(Text("OK")) {
-                                processSelectedUrls(urls: self.urlsToLoad)
-                            }
-                        )
-                    })
+                    .alert(item: $activeAlert) { activeAlert in
+                        switch activeAlert {
+                        case .photoCounter:
+                            return Alert(
+                                title: Text("\(selectedFileNames.count) photos added"),
+                                dismissButton: .default(Text("OK"))
+                            )
+                        case .thumbnailAlert:
+                            return Alert(
+                                title: Text("Important info"),
+                                message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
+                                dismissButton: .default(Text("OK")) {
+                                    processSelectedUrls(urls: self.urlsToLoad)
+                                }
+                            )
+                        }
+                    }
+//                    .alert(isPresented: $showPhotoCounterInfo, content: {
+//                        Alert(
+//                            title: Text("\(selectedFileNames.count) photos added"),
+//                            dismissButton: .default(Text("OK"))
+//                        )
+//                    })
+//                    .alert(isPresented: $showThumbnailAlert, content: {
+//                        Alert(
+//                            title: Text("\(totalPhotosToBeAdded) photos will be imported"),
+////                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
+//                            message: Text("Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
+//                            dismissButton: .default(Text("OK")) {
+//                                processSelectedUrls(urls: self.urlsToLoad)
+//                            }
+//                        )
+//                    })
 
                     
                     Divider()
@@ -531,7 +559,8 @@ struct ContentView: View {
         }
         
         if totalPhotosToBeAdded + totalPhotosAdded > thumbnailsEnabledTreshold {
-            showThumbnailAlert = true
+//            showThumbnailAlert = true
+            self.activeAlert = .thumbnailAlert
         } else {
             processSelectedUrls(urls: urls)
         }
@@ -554,7 +583,8 @@ struct ContentView: View {
         }
         group.notify(queue: .main) {
             // This will be called once all images are loaded
-            self.showPhotoCounterInfo = true
+            self.activeAlert = .photoCounter
+//            self.showPhotoCounterInfo = true
         }
     }
     
