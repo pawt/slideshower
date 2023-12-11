@@ -35,6 +35,10 @@ struct ContentView: View {
     
     @State private var showErasePhotosAlert = false
     @State private var confirmDeletePhotos = false
+    
+    @State private var showThumbnailAlert = false
+    @State private var urlsToLoad: [URL] = []
+    @State private var totalPhotosToBeAdded = 0
 
     
     // Determines if the thumbnails should be displayed
@@ -46,113 +50,135 @@ struct ContentView: View {
         
         VStack() {
             
-            ZStack(alignment: .bottomTrailing) {
-                ScrollView(.vertical, showsIndicators: true) {
-                    VStack() {
-                        ZStack {
-                            Color.white.frame(minHeight: 500)
+            HStack {
+                
+                ZStack(alignment: .bottomTrailing) {
+                    
+                    ScrollView(.vertical, showsIndicators: true) {
+                        
                             
-                            // Display thumbnails or filenames
-                            if shouldDisplayThumbnails && !images.isEmpty {
-                                ImageView(identifiableImages: images)
-                                    .frame(minHeight: 500)
-                            } else if !shouldDisplayThumbnails {
-                                List(images) { image in
-                                    Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
-                                }
-                            }
-                            
-                            // Display the progress view for the first time loading
-                            if isLoading && totalPhotosAdded == 0 {
+                            ZStack {
+//                                Color.white
+                                
+                                // Display thumbnails or filenames
                                 VStack {
-                                    Text("Adding photos...")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                        .padding(.top, 20)
-                                    ProgressView(value: progress, total: totalImagesToLoad)
-                                        .progressViewStyle(LinearProgressViewStyle())
-                                        .frame(maxWidth: 400)
-                                        .padding(20)
+                                    if shouldDisplayThumbnails && !images.isEmpty {
+                                        ImageView(identifiableImages: images)
+                                    } else if !shouldDisplayThumbnails {
+                                        List(images) { image in
+                                            Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                                        }
+                                    }
                                 }
-                                .background(Color.white)
-                            }
-                            
-                            // Display the progress view with border for subsequent loading
-                            else if isLoading {
-                                VStack {
-                                    Text("Adding photos...")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                        .padding(.top, 20)
-                                    ProgressView(value: progress, total: totalImagesToLoad)
-                                        .progressViewStyle(LinearProgressViewStyle())
-                                        .frame(maxWidth: 400)
-                                        .padding(20)
-                                }
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
-                                        .background(Color.white)
-                                )
-                                .padding(20)
-                            }
-                            
-                            // Display the placeholder when no images are loaded
-                            else if images.isEmpty {
-                                VStack {
-                                    Image("slideshower_logo")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 300)
-                                        .opacity(0.5)
-                                    Text("Selected photos will appear here")
-                                        .fontWeight(.light)
-                                        .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                        .font(.title2)
-                                }
-                            }
-                        }
-                    }
-                }
-                Button(action: {
-                    // Check if there are any photos added
-                    if !images.isEmpty {
-                        // If there are photos, show the alert
-                        self.showErasePhotosAlert = true}
-                    }
-                    // If there are no photos, do nothing
-                    )
-                {
-                    Image(systemName: "trash")
-                        .padding(.init(top: 5, leading: 0, bottom: 5, trailing: 0))
+                                .frame(minHeight: 550, maxHeight: .infinity)
 
-                }
-                .buttonStyle(BorderedButtonStyle())
-                .offset(x:-25, y:-25)
-                .help("Delete all added photos")
-                .onHover { inside in
-                    isHovered = inside
-                    NSCursor.pointingHand.set()
-                }
-                .alert(isPresented: $showErasePhotosAlert) {
-                    Alert(
-                        title: Text("Confirm Deletion"),
-                        message: Text("Do you really want to remove all added files?"),
-                        primaryButton: .destructive(Text("Yes")) {
-                            // Perform the deletion
-                            confirmDeletePhotos = true
-                            removeAllImages()
-                        },
-                        secondaryButton: .cancel {
-                            // User chose not to delete
-                            confirmDeletePhotos = false
+                                
+                                // Display the progress view for the first time loading
+                                if isLoading && totalPhotosAdded == 0 {
+                                    VStack {
+                                        Text("Adding photos...")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                            .padding(.top, 20)
+                                        ProgressView(value: progress, total: totalImagesToLoad)
+                                            .progressViewStyle(LinearProgressViewStyle())
+                                            .frame(maxWidth: 400)
+                                            .padding(20)
+                                    }
+                                    .background(Color.white)
+                                    .frame(minHeight: 550, maxHeight: .infinity)
+                                }
+                                
+                                
+                                // Display the progress view with border for subsequent loading
+                                else if isLoading {
+                                    VStack {
+                                        Text("Adding photos...")
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                            .padding(.top, 20)
+                                        ProgressView(value: progress, total: totalImagesToLoad)
+                                            .progressViewStyle(LinearProgressViewStyle())
+                                            .frame(maxWidth: 400)
+                                            .padding(20)
+                                    }
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+                                            .background(Color.white)
+                                    )
+                                    .padding(20)
+                                    .frame(minHeight: 550, maxHeight: .infinity)
+
+                                }
+                                
+                                // Display the placeholder when no images are loaded
+                                else if images.isEmpty {
+                                    VStack {
+                                        Image("slideshower_logo")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 300)
+                                            .opacity(0.5)
+                                        Text("Selected photos will appear here")
+                                            .fontWeight(.light)
+                                            .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
+                                            .font(.title2)
+                                    }
+                                    .frame(minHeight: 550, maxHeight: .infinity)
+
+                                }
                         }
+//                        .border(Color.orange, width: 2)
+//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        
+                    }
+//                    .border(Color.red, width: 1)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    Button(action: {
+                        // Check if there are any photos added
+                        if !images.isEmpty {
+                            // If there are photos, show the alert
+                            self.showErasePhotosAlert = true}
+                    }
+                           // If there are no photos, do nothing
                     )
+                    {
+                        Image(systemName: "trash")
+                            .padding(.init(top: 0, leading: 2, bottom: 0, trailing: 2))
+                        
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .offset(x:-25, y:-25)
+                    .help("Delete all added photos")
+                    .onHover { inside in
+                        isHovered = inside
+                        NSCursor.pointingHand.set()
+                    }
+                    .alert(isPresented: $showErasePhotosAlert) {
+                        Alert(
+                            title: Text("Confirm Deletion"),
+                            message: Text("Do you really want to remove all added files?"),
+                            primaryButton: .destructive(Text("Yes")) {
+                                // Perform the deletion
+                                confirmDeletePhotos = true
+                                removeAllImages()
+                            },
+                            secondaryButton: .cancel {
+                                // User chose not to delete
+                                confirmDeletePhotos = false
+                            }
+                        )
+                    }
                 }
             }
-            
+            .background(Color.white)
+
+            Spacer()
 
             HStack(alignment: .top){
+                Spacer()
                 
                 VStack {
                     VStack(alignment: .center) {
@@ -171,25 +197,11 @@ struct ContentView: View {
                         self.selectedFileNames.removeAll() // Reset the file names before adding new ones
                         
                         if openPanel.runModal() == .OK {
-                            let group = DispatchGroup()
-                            
-                            for url in openPanel.urls {
-                                group.enter() // Enter the group
-                                if url.hasDirectoryPath {
-                                    addImagesFromDirectory(url) {
-                                        group.leave() // Leave the group once images are loaded
-                                    }
-                                } else {
-                                    loadImages(from: [url]) {
-                                        group.leave() // Leave the group once image is loaded
-                                    }
-                                }
-                            }
-                            group.notify(queue: .main) {
-                                // This will be called once all images are loaded
-                                self.showPhotoCounterInfo = true
-                            }
+                            self.urlsToLoad = openPanel.urls
+                            prepareForLoadingImages(urls: openPanel.urls)
                         }
+                        
+                            
                     }) {
                         Text("Select files or a folder").font(.system(size: 13))
                             .foregroundStyle(Color.white)
@@ -202,12 +214,23 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
+
                     .alert(isPresented: $showPhotoCounterInfo, content: {
                         Alert(
                             title: Text("\(selectedFileNames.count) photos added"),
                             dismissButton: .default(Text("OK"))
                         )
                     })
+                    .alert(isPresented: $showThumbnailAlert) {
+                        Alert(
+                            title: Text("Large Number of Photos"),
+                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. It's more than 100, so thumbnails will not be displayed."),
+                            dismissButton: .default(Text("OK")) {
+                                processSelectedUrls(urls: self.urlsToLoad)
+                            }
+                        )
+                    }
+
                     
                     Divider()
                         .padding(.init(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -407,8 +430,8 @@ struct ContentView: View {
             }
             .padding(.bottom, 20)
             .padding(.horizontal)
+            .frame(maxHeight: 300)
             
-
             Spacer()
                         
             HStack {
@@ -467,6 +490,45 @@ struct ContentView: View {
         }
     }
     
+    // Function to handle the preparation of loading images
+    func prepareForLoadingImages(urls: [URL]) {
+        totalPhotosToBeAdded = urls.reduce(0) { (result, url) -> Int in
+            if url.hasDirectoryPath {
+                let fileURLs = try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
+                return result + (fileURLs?.count ?? 0)
+            } else {
+                return result + 1
+            }
+        }
+        
+        if totalPhotosToBeAdded + totalPhotosAdded > 100 {
+            showThumbnailAlert = true
+        } else {
+            processSelectedUrls(urls: urls)
+        }
+    }
+    
+    // Function to process URLs for both directories and individual files
+    func processSelectedUrls(urls: [URL]) {
+        let group = DispatchGroup()
+        for url in urls {
+            group.enter() // Enter the group
+            if url.hasDirectoryPath {
+                addImagesFromDirectory(url) {
+                    group.leave() // Leave the group once images are loaded
+                }
+            } else {
+                loadImages(from: [url]) {
+                    group.leave() // Leave the group once image is loaded
+                }
+            }
+        }
+        group.notify(queue: .main) {
+            // This will be called once all images are loaded
+            self.showPhotoCounterInfo = true
+        }
+    }
+    
     func addImagesFromDirectory(_ directoryURL: URL, completion: @escaping () -> Void) {
         let fileManager = FileManager.default
         var urlsToLoad: [URL] = []
@@ -488,6 +550,8 @@ struct ContentView: View {
         
     
     func loadImages(from urls: [URL], completion: @escaping () -> Void) {
+        
+        print("loadImages method is started.")
         
         // Reset progress and update totalImagesToLoad
         DispatchQueue.main.async {
