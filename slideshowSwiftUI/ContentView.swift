@@ -159,7 +159,6 @@ struct ContentView: View {
                     {
                         Image(systemName: "trash")
                             .padding(.init(top: 0, leading: 2, bottom: 0, trailing: 2))
-                        
                     }
                     .buttonStyle(BorderedButtonStyle())
                     .offset(x:-25, y:-25)
@@ -185,7 +184,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .background(Color.white)
+            .background(Color(NSColor.textBackgroundColor))
 
             Spacer()
 
@@ -355,27 +354,46 @@ struct ContentView: View {
                                     Spacer()
                                     Toggle("", isOn: $loopSlideshow)
                                 }
-                                .padding(.init(top: 0, leading: 10, bottom: 20, trailing: 10))
+                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 10))
                             }
                             .padding(0)
                             
                             Divider()
                                 .padding(5)
                             
-                            HStack(spacing: 8) {
-                                Image(systemName: "pause.circle")
-                                    .foregroundColor(.secondary)
-                                Text("SPACEBAR pauses the slideshow.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            HStack(spacing: 8) {
-                                Image(systemName: "escape")
-                                    .foregroundColor(.secondary)
-                                Text("ESC quits the slideshow.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                            VStack(alignment: .leading) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "pause.circle")
+                                        .foregroundColor(.secondary)
+                                    Text("Spacebar: pause the slideshow.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                HStack(spacing: 8) {
+                                    Image(systemName: "arrow.right")
+                                        .foregroundColor(.secondary)
+                                    Text("Right arrow: go to next photo.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                HStack(spacing: 8) {
+                                    Image(systemName: "arrow.left")
+                                        .foregroundColor(.secondary)
+                                    Text("Left arrow: go to previous photo.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                
+                                
+                                HStack(spacing: 8) {
+                                    Image(systemName: "escape")
+                                        .foregroundColor(.secondary)
+                                    Text("Escape: quit the slideshow.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                             
                         }

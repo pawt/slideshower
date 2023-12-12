@@ -24,6 +24,10 @@ struct SlideshowView: View {
     @State private var showPauseInfo = false
     @State private var showResumeInfo = false
     
+    // Add new properties for handling arrow keys
+    private let rightArrowKeyCode = 124 // Right arrow key code
+    private let leftArrowKeyCode = 123  // Left arrow key code
+    
     @State private var slideshowWorkItem: DispatchWorkItem?
 
     @Environment(\.presentationMode) var presentationMode
@@ -124,10 +128,76 @@ struct SlideshowView: View {
                 print("ESC key pressed.")
                 stopSlideshow() // Call the stopSlideshow function
             }
+            
+            // Handle right arrow key
+            if event.keyCode == rightArrowKeyCode {
+                goToNextPhoto()
+            }
+            // Handle left arrow key
+            if event.keyCode == leftArrowKeyCode {
+                goToPreviousPhoto()
+            }
         }
         .frame(width: 0, height: 0)
     }
     
+    private func goToNextPhoto() {
+        
+        // Cancel the current slideshow timer
+        slideshowWorkItem?.cancel()
+        
+        // Logic to go to the next photo
+        if randomOrder {
+            if !shuffledIndices.isEmpty {
+                currentIndex = shuffledIndices.removeFirst()
+            } else if loopSlideshow {
+                shuffledIndices = Array(0..<images.count).shuffled()
+                currentIndex = shuffledIndices.removeFirst()
+            }
+        } else {
+            if currentIndex < images.count - 1 {
+                currentIndex += 1
+            } else if loopSlideshow {
+                currentIndex = 0
+            }
+        }
+        
+        // Restart the slideshow
+        if randomOrder {
+            startRandomSlideshow()
+        } else {
+            startSlideshow()
+        }
+    }
+    
+    private func goToPreviousPhoto() {
+        
+        // Cancel the current slideshow timer
+        slideshowWorkItem?.cancel()
+        
+        // Logic to go to the previous photo
+        if randomOrder {
+            if currentIndex > 0 {
+                currentIndex = shuffledIndices.prefix(while: { $0 != currentIndex }).last ?? 0
+            } else if loopSlideshow {
+                shuffledIndices = Array(0..<images.count).shuffled()
+                currentIndex = shuffledIndices.last ?? 0
+            }
+        } else {
+            if currentIndex > 0 {
+                currentIndex -= 1
+            } else if loopSlideshow {
+                currentIndex = images.count - 1
+            }
+        }
+        
+        // Restart the slideshow
+        if randomOrder {
+            startRandomSlideshow()
+        } else {
+            startSlideshow()
+        }
+    }
     
     private func pauseSlideshow() {
         isPaused = true
