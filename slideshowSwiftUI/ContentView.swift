@@ -137,7 +137,7 @@ struct ContentView: View {
                             }
                             
                         }
-                        .border(Color.orange, width: 2)
+//                        .border(Color.orange, width: 2)
 
                     }
                     // .border(Color.green, width:2)
@@ -148,7 +148,7 @@ struct ContentView: View {
                     Button(action: {
                         self.hideThumbnailsButton.toggle()
                     }) {
-                        Image(systemName: hideThumbnailsButton ? "eye.fill" : "eye.slash.fill")                            
+                        Image(systemName: hideThumbnailsButton ? "eye.fill" : "eye.slash.fill")
                             .padding(.init(top: 0, leading: 2, bottom: 0, trailing: 2))
                     }
                     .buttonStyle(BorderedButtonStyle())
