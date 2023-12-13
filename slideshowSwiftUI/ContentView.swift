@@ -48,14 +48,16 @@ struct ContentView: View {
     @State private var urlsToLoad: [URL] = []
     @State private var totalPhotosToBeAdded = 0
     
-    @State private var thumbnailsEnabledTreshold = 100
+    @State private var thumbnailsEnabledTreshold = 200
     @State private var displayThumbnails = true
     
     @State private var activeAlert: ActiveAlert?
     
+    @State private var hideThumbnailsButton: Bool = false
+    
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
-        return displayThumbnails && images.count <= thumbnailsEnabledTreshold
+        return displayThumbnails && !hideThumbnailsButton && images.count <= thumbnailsEnabledTreshold
     }
     
     var body: some View {
@@ -66,87 +68,97 @@ struct ContentView: View {
                 
                 ZStack(alignment: .bottomTrailing) {
                     
-                    ScrollView(.vertical, showsIndicators: true) {
+                    VStack {
                         
+                        ZStack {
                             
-                            ZStack {
-//                                Color.white
-                                
-                                // Display thumbnails or filenames
+                            // Display thumbnails or filenames
+                            VStack {
+                                if shouldDisplayThumbnails && !images.isEmpty {
+                                    ImageView(identifiableImages: images)
+                                } else if !shouldDisplayThumbnails {
+                                    List(images) { image in
+                                        Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                                    }
+                                }
+                            }
+                            
+                            
+                            // Display the progress view for the first time loading
+                            if isLoading && totalPhotosAdded == 0 {
                                 VStack {
-                                    if shouldDisplayThumbnails && !images.isEmpty {
-                                        ImageView(identifiableImages: images)
-                                    } else if !shouldDisplayThumbnails {
-                                        List(images) { image in
-                                            Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
-                                        }
-                                    }
+                                    Text("Adding \(totalPhotosToBeAdded) photos...")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                        .padding(.top, 20)
+                                    ProgressView(value: progress, total: totalImagesToLoad)
+                                        .progressViewStyle(LinearProgressViewStyle())
+                                        .frame(maxWidth: 400)
+                                        .padding(20)
                                 }
-                                .frame(minHeight: 550, maxHeight: .infinity)
-
-                                
-                                // Display the progress view for the first time loading
-                                if isLoading && totalPhotosAdded == 0 {
-                                    VStack {
-                                        Text("Adding \(totalPhotosToBeAdded) photos...")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                            .padding(.top, 20)
-                                        ProgressView(value: progress, total: totalImagesToLoad)
-                                            .progressViewStyle(LinearProgressViewStyle())
-                                            .frame(maxWidth: 400)
-                                            .padding(20)
-                                    }
-                                    .background(Color.white)
-                                    .frame(minHeight: 550, maxHeight: .infinity)
+                                .background(Color.white)
+                            }
+                            
+                            
+                            // Display the progress view with border for subsequent loading
+                            else if isLoading {
+                                VStack {
+                                    Text("Adding \(totalPhotosToBeAdded) photos...")
+                                        .font(.headline)
+                                        .foregroundColor(.primary)
+                                        .padding(.top, 20)
+                                    ProgressView(value: progress, total: totalImagesToLoad)
+                                        .progressViewStyle(LinearProgressViewStyle())
+                                        .frame(maxWidth: 400)
+                                        .padding(20)
                                 }
-                                
-                                
-                                // Display the progress view with border for subsequent loading
-                                else if isLoading {
-                                    VStack {
-                                        Text("Adding \(totalPhotosToBeAdded) photos...")
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                            .padding(.top, 20)
-                                        ProgressView(value: progress, total: totalImagesToLoad)
-                                            .progressViewStyle(LinearProgressViewStyle())
-                                            .frame(maxWidth: 400)
-                                            .padding(20)
-                                    }
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
-                                            .background(Color.white)
-                                    )
-                                    .padding(20)
-                                    .frame(minHeight: 550, maxHeight: .infinity)
-
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+                                        .background(Color.white)
+                                )
+                                .padding(20)
+                            }
+                            
+                            // Display the placeholder when no images are loaded
+                            else if images.isEmpty {
+                                VStack {
+                                    Image("slideshower_logo")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 300)
+                                        .opacity(0.5)
+                                    Text("Selected photos will appear here")
+                                        .fontWeight(.light)
+                                        .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
+                                        .font(.title2)
                                 }
                                 
-                                // Display the placeholder when no images are loaded
-                                else if images.isEmpty {
-                                    VStack {
-                                        Image("slideshower_logo")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 300)
-                                            .opacity(0.5)
-                                        Text("Selected photos will appear here")
-                                            .fontWeight(.light)
-                                            .foregroundColor(Color(hue: 1.0, saturation: 0.0, brightness: 0.831))
-                                            .font(.title2)
-                                    }
-                                    .frame(minHeight: 550, maxHeight: .infinity)
-
-                                }
+                            }
+                            
                         }
-//                        .border(Color.orange, width: 2)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        
+                        .border(Color.orange, width: 2)
+
                     }
-//                    .border(Color.red, width: 1)
+                    // .border(Color.green, width:2)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+                    
+                    // Button to toggle between thumbnail and filename view
+                    Button(action: {
+                        self.hideThumbnailsButton.toggle()
+                    }) {
+                        Image(systemName: hideThumbnailsButton ? "eye.fill" : "eye.slash.fill")                            
+                            .padding(.init(top: 0, leading: 2, bottom: 0, trailing: 2))
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .offset(x:-70, y:-20)
+                    .help(hideThumbnailsButton ? "Show thumbnails" : "Hide thumbnails")
+                    .onHover { inside in
+                        isHovered = inside
+                        NSCursor.pointingHand.set()
+                    }
+                    .disabled(!displayThumbnails)
                     
                     Button(action: {
                         // Check if there are any photos added
@@ -161,7 +173,7 @@ struct ContentView: View {
                             .padding(.init(top: 0, leading: 2, bottom: 0, trailing: 2))
                     }
                     .buttonStyle(BorderedButtonStyle())
-                    .offset(x:-25, y:-25)
+                    .offset(x:-25, y:-20)
                     .help("Delete all added photos")
                     .onHover { inside in
                         isHovered = inside
@@ -182,6 +194,8 @@ struct ContentView: View {
                             }
                         )
                     }
+                    
+                    
                 }
             }
             .background(Color(NSColor.textBackgroundColor))
@@ -232,7 +246,7 @@ struct ContentView: View {
                             )
                         case .thumbnailAlert:
                             return Alert(
-                                title: Text("Important info"),
+                                title: Text("Important Info"),
                                 message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
                                 dismissButton: .default(Text("OK")) {
                                     processSelectedUrls(urls: self.urlsToLoad)
@@ -240,23 +254,6 @@ struct ContentView: View {
                             )
                         }
                     }
-//                    .alert(isPresented: $showPhotoCounterInfo, content: {
-//                        Alert(
-//                            title: Text("\(selectedFileNames.count) photos added"),
-//                            dismissButton: .default(Text("OK"))
-//                        )
-//                    })
-//                    .alert(isPresented: $showThumbnailAlert, content: {
-//                        Alert(
-//                            title: Text("\(totalPhotosToBeAdded) photos will be imported"),
-////                            message: Text("You are going to import \(totalPhotosToBeAdded) photos. Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
-//                            message: Text("Total num of photos added will be more than \(thumbnailsEnabledTreshold), so thumbnails will not be displayed (faster import)."),
-//                            dismissButton: .default(Text("OK")) {
-//                                processSelectedUrls(urls: self.urlsToLoad)
-//                            }
-//                        )
-//                    })
-
                     
                     Divider()
                         .padding(.init(top: 5, leading: 0, bottom: 5, trailing: 0))
@@ -755,10 +752,10 @@ struct ContentView: View {
         
         // Key for the event
         let key = "slideshowStarted"
-
+        
         // Count for the event
         let count: UInt = 1
-
+        
         // Segmentation for the event
         let segmentation: [String : String] = ["sessionID": sessionID,
                                                "slideshowSize": String(slideshowSize),
@@ -766,10 +763,10 @@ struct ContentView: View {
                                                "loopEnabled": String(loopEnabled),
                                                "shuffleEnabled": String(shuffleEnabled),
                                                "fadingEnabled": String(fadingEnabled)]
-
+        
         // Record the event with segmentation
         Countly.sharedInstance().recordEvent(key, segmentation: segmentation, count: count)
-
+        
         // Create a separate window for the slideshow
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
@@ -801,10 +798,10 @@ struct ContentView: View {
             randomOrder: randomOrder,
             loopSlideshow: loopSlideshow,
             useFadingTransition: useFadingTransition
-//            isSlideshowRunning: slideshowManager.isSlideshowRunning
+            //            isSlideshowRunning: slideshowManager.isSlideshowRunning
         )
             .environmentObject(slideshowManager)
-
+        
         window.contentView = NSHostingView(rootView: slideshowView)
         window.makeKeyAndOrderFront(nil)
     }
