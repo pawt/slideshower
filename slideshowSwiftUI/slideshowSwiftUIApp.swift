@@ -7,9 +7,11 @@
 
 import SwiftUI
 import Countly
+import Sparkle
 
 @main
 struct slideshowSwiftUIApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     // Create an instance of SlideshowManager
     var slideshowManager = SlideshowManager()
@@ -33,17 +35,50 @@ struct slideshowSwiftUIApp: App {
             ContentView()
                 .frame(minWidth: 900, minHeight: 750)
                 .environmentObject(slideshowManager)
+                .environmentObject(appDelegate.updaterControllerWrapper)
         }
         .windowResizability(.contentSize)
         .commands {
+            
+            CommandMenu("Updates") {
+                Button("Check for Updates…") {
+                    // Access updaterController through appDelegate
+                    appDelegate.updaterController.checkForUpdates(nil)
+                }
+            }
+        }
             // for example
 //            CommandGroup(replacing: .help) {
 //                Button(action: {}) {
 //                    Text("MyApp Help")
 //                }
 //            }
-        }
+        
     }
     
     
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var updaterController: SPUStandardUpdaterController!
+    
+    var updaterControllerWrapper = UpdaterControllerWrapper()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        
+        // Initialize the updater controller
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        
+        // Optionally, you can configure automatic update checks here
+        // This will start the updater which will check for updates based on the interval specified in your Info.plist
+        try? updaterController.updater.start()
+        
+        
+        // If you want to customize the behavior further, you can set the delegate
+        // and implement the appropriate delegate methods, like so:
+        // updaterController.updater.delegate = self
+        
+        // Pass updaterController to updaterControllerWrapper
+        updaterControllerWrapper.updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    }
 }
