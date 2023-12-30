@@ -39,11 +39,9 @@ struct slideshowSwiftUIApp: App {
         }
         .windowResizability(.contentSize)
         .commands {
-            
             CommandMenu("Updates") {
-                Button("Check for Updates…") {
-                    // Access updaterController through appDelegate
-                    appDelegate.updaterController.checkForUpdates(nil)
+                Button("Check for updates…") {
+                    appDelegate.updaterControllerWrapper.checkForUpdates()
                 }
             }
         }
@@ -60,25 +58,24 @@ struct slideshowSwiftUIApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var updaterController: SPUStandardUpdaterController!
-    
     var updaterControllerWrapper = UpdaterControllerWrapper()
+    
+    deinit {
+        print("AppDelegate is being deinitialized")
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         
-        // Initialize the updater controller
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
-        
-        // Optionally, you can configure automatic update checks here
-        // This will start the updater which will check for updates based on the interval specified in your Info.plist
-        try? updaterController.updater.start()
+        // Ensure that the updaterController within updaterControllerWrapper is initialized
+//        updaterControllerWrapper.createUpdaterController()
+                
+        // Now you can safely start the updater
+//        try? updaterControllerWrapper.updaterController?.updater.start()
         
         
         // If you want to customize the behavior further, you can set the delegate
         // and implement the appropriate delegate methods, like so:
         // updaterController.updater.delegate = self
         
-        // Pass updaterController to updaterControllerWrapper
-        updaterControllerWrapper.updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     }
 }
