@@ -20,6 +20,7 @@ enum ActiveAlert: Identifiable {
 
 struct ContentView: View {
     @EnvironmentObject var slideshowManager: SlideshowManager
+    @EnvironmentObject var updaterControllerWrapper: UpdaterControllerWrapper
     
     @State private var images: [IdentifiableImage] = []
     @State private var selectedFileNames: [String] = []
@@ -35,7 +36,7 @@ struct ContentView: View {
     @State private var useFadingTransition = false
     
     @State private var isInfoVisible = false
-    @State private var isVersionPopoverPresented = false
+//    @State private var isVersionPopoverPresented = false
     
     @State private var progress = 0.0
     @State private var totalImagesToLoad = 0.0
@@ -54,6 +55,8 @@ struct ContentView: View {
     @State private var activeAlert: ActiveAlert?
     
     @State private var hideThumbnailsButton: Bool = false
+    
+    @State private var isUpdatePopoverPresented = false
     
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
@@ -203,6 +206,7 @@ struct ContentView: View {
             Spacer()
 
             HStack(alignment: .top){
+                
                 Spacer()
                 
                 VStack {
@@ -479,10 +483,10 @@ struct ContentView: View {
             HStack {
                 Text("If you like this app")
                     .font(.caption)
-                    .padding(.init(top: 0, leading: 10, bottom: 10, trailing: -5))
-                Link("support its development.", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
+                    .padding(.init(top: 0, leading: 10, bottom: 7, trailing: -5))
+                Link("buy me a coffee :)", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
                     .font(.caption)
-                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                    .padding(.init(top: 0, leading: 0, bottom: 7, trailing: 0))
                     .onHover { hovering in
                         if hovering {
                             NSCursor.pointingHand.push()
@@ -495,39 +499,64 @@ struct ContentView: View {
                 
                 Label("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")", systemImage: "info.circle")
                     .font(.caption)
-                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
-                    .onTapGesture {
-                        self.isVersionPopoverPresented = true
-                    }
-                    .onHover { hovering in
-                        if hovering {
-                            NSCursor.pointingHand.push()
-                        } else {
-                            NSCursor.pop()
-                        }
-                    }
-                    .popover(isPresented: $isVersionPopoverPresented) {
-                        VStack {
-                            Text("Slideshower version")
-                                .font(.headline)
-                                .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
-                            Text("Go to www.slideshower.com to see the latest version available.")
-                                .padding()
-                        }
-                        .padding(10)
-                        .frame(width: 400)
-                    }
+                    .padding(.init(top: 0, leading: 0, bottom: 7, trailing: 0))
+//                    .onTapGesture {
+//                        self.isVersionPopoverPresented = true
+//                    }
+//                    .popover(isPresented: $isVersionPopoverPresented) {
+//                        VStack {
+//                            Text("Slideshower version")
+//                                .font(.headline)
+//                                .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
+//                            Text("Go to www.slideshower.com to see the latest version available.")
+//                                .padding()
+//                        }
+//                        .padding(10)
+//                        .frame(width: 400)
+//                    }
+//                    .onTapGesture {
+//                            self.isVersionPopoverPresented = true
+//                    }
+//                    .popover(isPresented: $isVersionPopoverPresented) {
+//                        VStack {
+////                            Text("Slideshower version")
+////                                .font(.headline)
+////                                .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
+////                            Text("Slideshower version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
+////                                .padding(.init(top: 5, leading: 0, bottom: 0, trailing: 0))
+//                            Button("Check for Updates") {
+//                                // Assuming you have access to updaterController here
+//                                updaterControllerWrapper.updaterController?.checkForUpdates(nil)
+//                            }
+//                            .padding()
+//                        }
+//                        .frame(width: 200)
+//                    }
                 
-                Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
-                    .font(.caption)
-                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
-                    .onHover { hovering in
-                        if hovering {
-                            NSCursor.pointingHand.push()
-                        } else {
-                            NSCursor.pop()
-                        }
+                Button("Check for updates") {
+                    // Assuming you have access to updaterController here
+                    updaterControllerWrapper.updaterController?.checkForUpdates(nil)
+                }
+                .font(.caption)
+                .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
+                .onHover { hovering in
+                    if hovering {
+                        NSCursor.pointingHand.push()
+                    } else {
+                        NSCursor.pop()
                     }
+                }
+                
+//                Link("https://slideshower.com", destination: URL(string: "https://slideshower.com")!)
+//                    .font(.caption)
+//                    .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
+//                    .onHover { hovering in
+//                        if hovering {
+//                            NSCursor.pointingHand.push()
+//                        } else {
+//                            NSCursor.pop()
+//                        }
+//                    }
             }
         }
     }

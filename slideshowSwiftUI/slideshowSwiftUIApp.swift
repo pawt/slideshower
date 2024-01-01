@@ -7,9 +7,11 @@
 
 import SwiftUI
 import Countly
+import Sparkle
 
 @main
 struct slideshowSwiftUIApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     // Create an instance of SlideshowManager
     var slideshowManager = SlideshowManager()
@@ -33,17 +35,47 @@ struct slideshowSwiftUIApp: App {
             ContentView()
                 .frame(minWidth: 900, minHeight: 750)
                 .environmentObject(slideshowManager)
+                .environmentObject(appDelegate.updaterControllerWrapper)
         }
         .windowResizability(.contentSize)
         .commands {
+            CommandMenu("Updates") {
+                Button("Check for updates…") {
+                    appDelegate.updaterControllerWrapper.checkForUpdates()
+                }
+            }
+        }
             // for example
 //            CommandGroup(replacing: .help) {
 //                Button(action: {}) {
 //                    Text("MyApp Help")
 //                }
 //            }
-        }
+        
     }
     
     
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var updaterControllerWrapper = UpdaterControllerWrapper()
+    
+    deinit {
+        print("AppDelegate is being deinitialized")
+    }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        
+        // Ensure that the updaterController within updaterControllerWrapper is initialized
+//        updaterControllerWrapper.createUpdaterController()
+                
+        // Now you can safely start the updater
+//        try? updaterControllerWrapper.updaterController?.updater.start()
+        
+        
+        // If you want to customize the behavior further, you can set the delegate
+        // and implement the appropriate delegate methods, like so:
+        // updaterController.updater.delegate = self
+        
+    }
 }
