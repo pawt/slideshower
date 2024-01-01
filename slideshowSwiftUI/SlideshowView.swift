@@ -53,8 +53,8 @@ struct SlideshowView: View {
                     .cornerRadius(10)
                     .transition(.opacity)
                     .onAppear {
-                        // Automatically hide the pause info after 2 seconds
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        // Automatically hide the pause info after 1 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             withAnimation {
                                 self.showPauseInfo = false
                             }
@@ -71,8 +71,8 @@ struct SlideshowView: View {
                     .cornerRadius(10)
                     .transition(.opacity)
                     .onAppear {
-                        // Automatically hide the resume info after 2 seconds
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        // Automatically hide the resume info after 1 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                             withAnimation {
                                 self.showResumeInfo = false
                             }
