@@ -9,6 +9,6 @@
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 	<key>SUFeedURL</key>
-	<string>http://localhost:1313/appcast.xml</string>
+	<string>https://slideshower.com/appcast.xml</string>
 </dict>
 </plist>
