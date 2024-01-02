@@ -24,10 +24,13 @@ struct slideshowSwiftUIApp: App {
         config.appKey = "b45bc8d055233be28efd89ca5cdfec81d0de681d"
         config.features = [CLYFeature.pushNotifications, CLYFeature.crashReporting]
         config.updateSessionPeriod = 600
+        
+//        config.enableDebug = true
+
 
         // Start Countly with the configuration
         Countly.sharedInstance().start(with: config)
-        }
+    }
 
     
     var body: some Scene {
@@ -78,4 +81,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // updaterController.updater.delegate = self
         
     }
+    
+//    func applicationWillTerminate(_ notification: Notification) {
+//            // Manually end the Countly session when the application is about to terminate
+//            Countly.sharedInstance().endSession()
+//    }
+//
+//    func applicationDidEnterBackground(_ notification: Notification) {
+//            // Manually end the Countly session when the application enters background
+//            Countly.sharedInstance().endSession()
+//    }
 }

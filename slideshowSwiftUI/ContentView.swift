@@ -534,8 +534,7 @@ struct ContentView: View {
 //                    }
                 
                 Button("Check for updates") {
-                    // Assuming you have access to updaterController here
-                    updaterControllerWrapper.updaterController?.checkForUpdates(nil)
+                    self.checkForUpdatesButtonClicked()
                 }
                 .font(.caption)
                 .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 10))
@@ -640,58 +639,6 @@ struct ContentView: View {
             }
         }
     }
-
-    
-    // Function to process URLs for both directories and individual files
-//    func processSelectedUrls(urls: [URL]) {
-//        let group = DispatchGroup()
-//        var totalImagesInBatch = 0
-//        
-//        for url in urls {
-//            group.enter() // Enter the group
-//            if url.hasDirectoryPath {
-//                // Calculate total number of image files in the directory
-//                do {
-//                    let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
-//                    let imageFileURLs = fileURLs.filter {
-//                        let fileType = $0.pathExtension.lowercased()
-//                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
-//                    }
-//                    totalImagesInBatch += imageFileURLs.count
-//                } catch {
-//                    print("Error reading directory contents: \(error)")
-//                }
-//            } else {
-//                // If it's not a directory, increment the count if it's an image file
-//                let fileType = url.pathExtension.lowercased()
-//                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
-//                    totalImagesInBatch += 1
-//                }
-//            }
-//        }
-//        
-//        
-//        for url in urls {
-//            if url.hasDirectoryPath {
-//                addImagesFromDirectory(url) {
-//                    group.leave() // Leave the group once images are loaded
-//                }
-//            } else {
-//                loadImages(from: [url]) {
-//                    group.leave() // Leave the group once image is loaded
-//                }
-//            }
-//        }
-//        
-//        group.notify(queue: .main) {
-//            // This will be called once all images are loaded
-//            self.activeAlert = .photoCounter
-//            // Check if the threshold is exceeded and update the thumbnail display
-//            if totalImagesInBatch + self.totalPhotosAdded > self.thumbnailsEnabledTreshold {
-//                self.displayThumbnails = false
-//            }
-//        }
-//    }
     
     func addImagesFromDirectory(_ directoryURL: URL, completion: @escaping () -> Void) {
         let fileManager = FileManager.default
@@ -833,6 +780,21 @@ struct ContentView: View {
         
         window.contentView = NSHostingView(rootView: slideshowView)
         window.makeKeyAndOrderFront(nil)
+    }
+    
+    func checkForUpdatesButtonClicked() {
+
+        // Get the current version string directly
+        let currentVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+        
+        // Pass the version string as part of the segmentation dictionary
+        Countly.sharedInstance().recordEvent("check_for_updates_clicked", segmentation: ["version": currentVersion], count: 1)
+        
+        // This is the action tied to your "Check for updates" button
+        updaterControllerWrapper.updaterController?.checkForUpdates(nil)
+        
+
+
     }
     
 }
