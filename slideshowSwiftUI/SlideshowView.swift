@@ -18,7 +18,6 @@ struct SlideshowView: View {
 
     @State private var currentIndex = 0
     @State private var shuffledIndices: [Int] = []
-    @State private var isMouseOver = false
     
     @State private var isPaused = false
     @State private var showPauseInfo = false
@@ -31,6 +30,10 @@ struct SlideshowView: View {
     @State private var slideshowWorkItem: DispatchWorkItem?
 
     @Environment(\.presentationMode) var presentationMode
+    
+    @State private var isMouseOver = false
+    @State private var cursorTimer: Timer?
+    private let cursorHideDelay: TimeInterval = 1.0
     
     var body: some View {
         ZStack {
@@ -101,10 +104,16 @@ struct SlideshowView: View {
                     self.stopSlideshow()
                 }
         }
+        .onAppear {
+            self.startMouseTracking()
+        }
         .onDisappear {
             // Stop the slideshow and remove observer when view disappears
             stopSlideshow()
             NotificationCenter.default.removeObserver(self)
+        }
+        .onDisappear {
+            self.stopMouseTracking()
         }
         .onReceive(slideshowManager.$isSlideshowRunning) { isRunning in
             if !isRunning {
@@ -291,6 +300,48 @@ struct SlideshowView: View {
         }
         presentationMode.wrappedValue.dismiss()
     }
+    
+    private func startMouseTracking() {
+        let trackingArea = NSTrackingArea(rect: NSApp.keyWindow?.contentView?.bounds ?? .zero, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
+        NSApp.keyWindow?.contentView?.addTrackingArea(trackingArea)
+        
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.willUpdateNotification,
+            object: nil,
+            queue: nil
+        ) { _ in
+            // Invalidate previous timer
+            self.cursorTimer?.invalidate()
+
+            // Schedule a new timer
+            self.cursorTimer = Timer.scheduledTimer(withTimeInterval: self.cursorHideDelay, repeats: false) { _ in
+                guard let currentWindow = NSApp.keyWindow else { return }
+                
+                // Check if the window is in full screen and the application is active
+                if currentWindow.styleMask.contains(.fullScreen) && NSApp.isActive {
+                    let mouseLocation = NSEvent.mouseLocation
+                    
+                    // Get the frame of the current screen
+                    if let screenWithMouse = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) {
+                        guard let windowScreen = currentWindow.screen else { return }
+                        
+                        // Check if the mouse is on the same screen as the full-screen window
+                        if screenWithMouse == windowScreen {
+                            // Hide the cursor
+                            NSCursor.setHiddenUntilMouseMoves(true)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func stopMouseTracking() {
+        cursorTimer?.invalidate()
+        cursorTimer = nil
+        NSApp.keyWindow?.contentView?.trackingAreas.forEach { NSApp.keyWindow?.contentView?.removeTrackingArea($0) }
+    }
+
     
     
 }
