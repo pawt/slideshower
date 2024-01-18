@@ -327,7 +327,7 @@ struct ContentView: View {
                                 HStack {
                                     Text("Delay between photos (in sec):")
                                     Spacer()
-                                    TextField("Enter delay", text: $delayInput)
+                                    TextField("", text: $delayInput)
                                         .frame(width: 60)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
                                         .multilineTextAlignment(.center)
@@ -336,6 +336,16 @@ struct ContentView: View {
                                                 slideshowDelay = delay
                                             }
                                         }
+                                        .onReceive(delayInput.publisher.collect()) {
+                                            let filtered = String($0.prefix(5)).filter { "0123456789".contains($0) }
+                                            if filtered != delayInput {
+                                                delayInput = filtered // Allows only numbers
+                                            }
+                                            if let number = Double(filtered), number >= 1, number <= 60 {
+                                                slideshowDelay = number
+                                            }
+                                        }
+                                        
                                 }
                                 .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                                 HStack {
