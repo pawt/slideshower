@@ -95,14 +95,6 @@ struct SlideshowView: View {
                     startSlideshow()
                 }
             }
-            
-            // Add observer to handle exit from full-screen
-            NotificationCenter.default.addObserver(
-                forName: NSWindow.didExitFullScreenNotification,
-                object: nil,
-                queue: .main) { _ in
-                    self.stopSlideshow()
-                }
         }
         .onAppear {
             self.startMouseTracking()
