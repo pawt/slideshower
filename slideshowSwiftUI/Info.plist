@@ -9,9 +9,9 @@
 	<key>SUScheduledCheckInterval</key>
 	<integer>86400</integer>
 	<key>CFBundleVersion</key>
-	<string>1.8</string>
+	<string>1.9</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.8</string>
+	<string>1.9</string>
 	<key>SUFeedURL</key>
 	<string>https://slideshower.com/appcast.xml</string>
 </dict>
