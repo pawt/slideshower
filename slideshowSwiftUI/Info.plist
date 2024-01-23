@@ -2,16 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>SUEnableInstallerLauncherService</key>
+	<string>YES</string>
 	<key>SUPublicEDKey</key>
 	<string>i4qD7NpuAiijDfZkC6GA6V9Ns534WE3vaCX41f/+Caw=</string>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUScheduledCheckInterval</key>
-	<integer>86400</integer>
+	<integer>172800</integer>
 	<key>CFBundleVersion</key>
 	<string>1.9</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.9</string>
+	<key>SUFeedURL_test</key>
+	<string>http://localhost:1313/appcast.xml</string>
 	<key>SUFeedURL</key>
 	<string>https://slideshower.com/appcast.xml</string>
 </dict>
