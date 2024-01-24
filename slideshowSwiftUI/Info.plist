@@ -11,7 +11,7 @@
 	<key>SUScheduledCheckInterval</key>
 	<integer>172800</integer>
 	<key>CFBundleVersion</key>
-	<string>1.9</string>
+	<string>2</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.9</string>
 	<key>SUFeedURL_test</key>
