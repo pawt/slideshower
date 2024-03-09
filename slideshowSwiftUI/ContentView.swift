@@ -498,10 +498,10 @@ struct ContentView: View {
             Spacer()
                         
             HStack {
-                Text("If you like this app")
+                Text("Support app development -")
                     .font(.caption)
                     .padding(.init(top: 0, leading: 10, bottom: 7, trailing: -5))
-                Link("buy me a coffee :)", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
+                Link("you can buy me a coffee \u{2615}", destination: URL(string: "https://www.buymeacoffee.com/slideshower")!)
                     .font(.caption)
                     .padding(.init(top: 0, leading: 0, bottom: 7, trailing: 0))
                     .onHover { hovering in
@@ -512,7 +512,6 @@ struct ContentView: View {
                         }
                     }
                 Spacer()
-                
                 
                 Label("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")", systemImage: "info.circle")
                     .font(.caption)
@@ -738,7 +737,6 @@ struct ContentView: View {
         // Create a separate window for the slideshow
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: NSScreen.main?.frame.width ?? 800, height: NSScreen.main?.frame.height ?? 600),
-            //styleMask: [.titled, .closable, .resizable],
             styleMask: [.fullSizeContentView, .closable, .resizable, .miniaturizable, .titled],
             backing: .buffered,
             defer: false)
