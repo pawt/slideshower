@@ -37,15 +37,6 @@ struct SlideshowView: View {
     
     var body: some View {
         ZStack {
-//            if images.indices.contains(currentIndex) {
-//                images[currentIndex].image
-//                    .resizable()
-//                    .scaledToFit()
-//                    .id(currentIndex)
-//                    .edgesIgnoringSafeArea(.all)
-//                    .transition(.asymmetric(insertion: .opacity, removal: .opacity))
-//                    .animation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil, value: currentIndex)
-//            }
             if images.indices.contains(currentIndex) {
                 let image = images[currentIndex]
                 if image.isGIF, let gifData = image.gifData {
