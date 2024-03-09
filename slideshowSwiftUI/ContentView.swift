@@ -49,7 +49,7 @@ struct ContentView: View {
     @State private var urlsToLoad: [URL] = []
     @State private var totalPhotosToBeAdded = 0
     
-    @State private var thumbnailsEnabledTreshold = 200
+    @State private var thumbnailsEnabledTreshold = 150
     @State private var displayThumbnails = true
     
     @State private var activeAlert: ActiveAlert?
@@ -221,7 +221,10 @@ struct ContentView: View {
                         openPanel.allowsMultipleSelection = true
                         openPanel.canChooseDirectories = true
                         openPanel.canChooseFiles = true
-                        openPanel.allowedContentTypes = [UTType.jpeg, UTType.png, UTType.heic]
+                        openPanel.allowedContentTypes = [UTType.jpeg, 
+                                                         UTType.png,
+                                                         UTType.heic,
+                                                         UTType.gif]
                         
                         self.selectedFileNames.removeAll() // Reset the file names before adding new ones
                         
@@ -581,7 +584,7 @@ struct ContentView: View {
                     // Filter out non-image files
                     let imageFileURLs = fileURLs.filter {
                         let fileType = $0.pathExtension.lowercased()
-                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
+                        return ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType)
                     }
                     print("Directory: \(url.lastPathComponent), Image file count: \(imageFileURLs.count)")
                     return result + imageFileURLs.count
@@ -592,7 +595,7 @@ struct ContentView: View {
             } else {
                 // If it's not a directory, check if it's an image file
                 let fileType = url.pathExtension.lowercased()
-                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
+                if ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType) {
                     return result + 1
                 } else {
                     return result
@@ -623,7 +626,7 @@ struct ContentView: View {
                     let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
                     allUrlsToLoad += fileURLs.filter {
                         let fileType = $0.pathExtension.lowercased()
-                        return ["jpg", "jpeg", "png", "heic"].contains(fileType)
+                        return ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType)
                     }
                 } catch {
                     print("Error reading directory contents: \(error)")
@@ -686,17 +689,34 @@ struct ContentView: View {
             var newFileNames = [String]()
             
             for url in urls {
-                if let nsImage = NSImage(contentsOf: url) {
+                do {
+                    let data = try Data(contentsOf: url)
                     let fileName = url.lastPathComponent
-                    // Create the image and append it to your array
+                    let isGIF = url.pathExtension.lowercased() == "gif"
+                    
+                    if isGIF {
+                        // Use NSImage to extract the first frame for display purposes in the UI
+                        if let nsImage = NSImage(data: data), let tiffData = nsImage.tiffRepresentation, let firstFrame = NSImage(data: tiffData) {
+                            let gifImage = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName)
+                            newImages.append(gifImage)
+                        }
+                    } else {
+                        // For non-GIFs, we create a SwiftUI Image
+                        if let nsImage = NSImage(data: data) {
+                            let image = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName)
+                            newImages.append(image)
+                        }
+                    }
+                    
                     newFileNames.append(fileName)
-                    newImages.append(IdentifiableImage(id: UUID(), image: Image(nsImage: nsImage), filename: fileName))
                     
                     // Update progress on the main thread
                     DispatchQueue.main.async {
                         self.progress += 1 // Increment progress for each image
                     }
                     
+                } catch {
+                    print("Error loading image from \(url): \(error.localizedDescription)")
                 }
             }
             
@@ -704,6 +724,7 @@ struct ContentView: View {
                 self.images.append(contentsOf: newImages)
                 self.selectedFileNames.append(contentsOf: newFileNames)
                 self.totalPhotosAdded += newImages.count
+                
                 
                 // Update displayThumbnails based on the new total
                 if self.totalPhotosAdded <= self.thumbnailsEnabledTreshold {
@@ -713,7 +734,6 @@ struct ContentView: View {
                 self.isLoading = false
                 completion()
             }
-
         }
     }
 
