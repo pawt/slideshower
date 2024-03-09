@@ -235,7 +235,6 @@ struct SlideshowView: View {
                     self.shuffledIndices = Array(0..<self.images.count).shuffled()
                     self.currentIndex = self.shuffledIndices.removeFirst()
                 } else {
-                    // If not looping and no images left, stop the slideshow
                     self.slideshowManager.isSlideshowRunning = false
                     return
                 }
@@ -268,7 +267,6 @@ struct SlideshowView: View {
                     if self.loopSlideshow {
                         self.currentIndex = 0
                     } else {
-                        // If not looping, stop the slideshow
                         self.slideshowManager.isSlideshowRunning = false
                     }
                 }
@@ -337,7 +335,5 @@ struct SlideshowView: View {
         cursorTimer = nil
         NSApp.keyWindow?.contentView?.trackingAreas.forEach { NSApp.keyWindow?.contentView?.removeTrackingArea($0) }
     }
-
-    
     
 }

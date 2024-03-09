@@ -36,7 +36,6 @@ struct ContentView: View {
     @State private var useFadingTransition = false
     
     @State private var isInfoVisible = false
-//    @State private var isVersionPopoverPresented = false
     
     @State private var progress = 0.0
     @State private var totalImagesToLoad = 0.0
@@ -99,7 +98,12 @@ struct ContentView: View {
                                         .frame(maxWidth: 400)
                                         .padding(20)
                                 }
-                                .background(Color.white)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
+                                        .background(Color(NSColor.windowBackgroundColor)) // Adapts to dark and light mode
+                                )
+                                .padding(20)
                             }
                             
                             
@@ -118,7 +122,7 @@ struct ContentView: View {
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
                                         .stroke(Color.gray.opacity(0.5), lineWidth: 0.5)
-                                        .background(Color.white)
+                                        .background(Color(NSColor.windowBackgroundColor)) // Adapts to dark and light mode
                                 )
                                 .padding(20)
                             }
@@ -618,7 +622,7 @@ struct ContentView: View {
             let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
             for fileURL in fileURLs {
                 let fileType = fileURL.pathExtension.lowercased()
-                if ["jpg", "jpeg", "png", "heic"].contains(fileType) {
+                if ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType) {
                     urlsToLoad.append(fileURL)
                 }
             }
