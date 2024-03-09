@@ -18,5 +18,7 @@
 	<string>http://localhost:1313/appcast.xml</string>
 	<key>SUFeedURL</key>
 	<string>https://slideshower.com/appcast.xml</string>
+	<key>CFBundleIdentifier</key>
+	<string>trybulski.slideshower</string>
 </dict>
 </plist>
