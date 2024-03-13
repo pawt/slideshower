@@ -48,7 +48,7 @@ struct ContentView: View {
     @State private var urlsToLoad: [URL] = []
     @State private var totalPhotosToBeAdded = 0
     
-    @State private var thumbnailsEnabledTreshold = 150
+    @State private var thumbnailsEnabledTreshold = 200
     @State private var displayThumbnails = true
     
     @State private var activeAlert: ActiveAlert?
@@ -74,31 +74,20 @@ struct ContentView: View {
                         
                         ZStack {
                             
-                            // Display thumbnails or filenames
-//                            VStack {
-//                                if shouldDisplayThumbnails && !images.isEmpty {
-//                                    ImageView(identifiableImages: images)
-//                                } else if !shouldDisplayThumbnails {
-//                                    List(images) { image in
-//                                        Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
-//                                    }
-//                                }
-//                            }
-                            
                             VStack {
                                 if shouldDisplayThumbnails && !images.isEmpty {
                                     ImageView(identifiableImages: images)
-                                } else if !shouldDisplayThumbnails {
+                                } else if !shouldDisplayThumbnails && !images.isEmpty {
                                     List {
                                         Section(header:
                                             HStack {
                                                 Text("Filename").bold()
                                                     .frame(width: 250, alignment: .leading) // Set this width to match your filename column
-                                                    .padding(.leading, 5)
                                                 Text("Path").bold()
-                                                    .frame(alignment: .leading) // Adjust as needed to align with the path column
+                                                    .frame(alignment: .leading)
+                                                    .padding(.leading, 5) // Adjust as needed to align with the path column
                                             }
-                                            .padding(.leading, 10) // This is to align with the padding of the list rows
+                                            .padding(.leading, 5) // This is to align with the padding of the list rows
                                         ) {
                                             ForEach(images) { image in
                                                 HStack {
@@ -115,10 +104,8 @@ struct ContentView: View {
                                         }
                                     }
                                     .listStyle(PlainListStyle())
-
                                 }
                             }
-                            
                             
                             // Display the progress view for the first time loading
                             if isLoading && totalPhotosAdded == 0 {
@@ -199,7 +186,7 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
-                    .disabled(!displayThumbnails)
+                    .disabled(!displayThumbnails || images.isEmpty)
                     
                     Button(action: {
                         // Check if there are any photos added
@@ -220,6 +207,7 @@ struct ContentView: View {
                         isHovered = inside
                         NSCursor.pointingHand.set()
                     }
+                    .disabled(images.isEmpty)
                     .alert(isPresented: $showErasePhotosAlert) {
                         Alert(
                             title: Text("Confirm Deletion"),
@@ -665,63 +653,63 @@ struct ContentView: View {
             completion()
         }
     }
-
-        
+    
+    
     
     func loadImages(from urls: [URL], completion: @escaping () -> Void) {
-        
         print("loadImages method is started.")
-        
+
         // Reset progress and update totalImagesToLoad
         DispatchQueue.main.async {
             self.progress = 0
-//            self.totalImagesToLoad = Double(urls.count)
+            self.totalImagesToLoad = Double(urls.count) // Reset the total images to load to the count of URLs
             self.isLoading = true
         }
         
-        DispatchQueue.global(qos: .background).async {
+        let dispatchGroup = DispatchGroup() // Create a dispatch group to manage batch completion
+        
+        DispatchQueue.global(qos: .userInitiated).async {
             var newImages = [IdentifiableImage]()
             var newFileNames = [String]()
-            
+
             for url in urls {
-                do {
-                    let data = try Data(contentsOf: url)
-                    let fileName = url.lastPathComponent
-                    let filePath = url.deletingLastPathComponent().path
-                    let isGIF = url.pathExtension.lowercased() == "gif"
-                    
-                    if isGIF {
-                        // Use NSImage to extract the first frame for display purposes in the UI
-                        if let nsImage = NSImage(data: data), let tiffData = nsImage.tiffRepresentation, let firstFrame = NSImage(data: tiffData) {
-                            let gifImage = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName, path: filePath)
-                            newImages.append(gifImage)
+                dispatchGroup.enter() // Enter the group for each URL being processed
+                
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        let data = try Data(contentsOf: url)
+                        let fileName = url.lastPathComponent
+                        let filePath = url.deletingLastPathComponent().path
+                        let isGIF = url.pathExtension.lowercased() == "gif"
+                        
+                        var imageToAdd: IdentifiableImage?
+                        if isGIF {
+                            if let nsImage = NSImage(data: data), let tiffData = nsImage.tiffRepresentation, let firstFrame = NSImage(data: tiffData) {
+                                imageToAdd = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName, path: filePath)
+                            }
+                        } else {
+                            if let nsImage = NSImage(data: data) {
+                                imageToAdd = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName, path: filePath)
+                            }
                         }
-                    } else {
-                        // For non-GIFs, we create a SwiftUI Image
-                        if let nsImage = NSImage(data: data) {
-                            let image = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName, path: filePath)
-                            newImages.append(image)
+                        
+                        if let image = imageToAdd {
+                            DispatchQueue.main.async {
+                                self.images.append(image)
+                                self.selectedFileNames.append(fileName)
+                                self.progress += 1 // Increment progress for each image
+                                self.totalPhotosAdded += 1 // Update the total number of photos added
+                            }
                         }
+                        
+                    } catch {
+                        print("Error loading image from \(url): \(error.localizedDescription)")
                     }
-                    
-                    newFileNames.append(fileName)
-                    
-                    // Update progress on the main thread
-                    DispatchQueue.main.async {
-                        self.progress += 1 // Increment progress for each image
-                    }
-                    
-                } catch {
-                    print("Error loading image from \(url): \(error.localizedDescription)")
+                    dispatchGroup.leave() // Leave the group when processing of the URL is complete
                 }
             }
             
-            DispatchQueue.main.async {
-                self.images.append(contentsOf: newImages)
-                self.selectedFileNames.append(contentsOf: newFileNames)
-                self.totalPhotosAdded += newImages.count
-                
-                
+            dispatchGroup.notify(queue: .main) {
                 // Update displayThumbnails based on the new total
                 if self.totalPhotosAdded <= self.thumbnailsEnabledTreshold {
                     self.displayThumbnails = true
