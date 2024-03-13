@@ -19,28 +19,32 @@ struct IdentifiableImage: Identifiable {
     var gifData: Data?  // The raw data for GIF images
     var isGIF: Bool  // Indicates whether the image is a GIF
     var filename: String  // The name of the file, useful for debugging or UI display
+    var path: String // The directory path of the file
 
     // Initializer for non-GIF images
-    init(image: Image, filename: String) {
+    init(image: Image, filename: String, path: String) {
         self.image = image
         self.filename = filename
         self.isGIF = false
         self.gifData = nil
+        self.path = path
     }
 
     // Initializer for GIF images
-    init(image: Image, gifData: Data, isGIF: Bool, filename: String) {
+    init(image: Image, gifData: Data, isGIF: Bool, filename: String, path: String) {
         self.image = image
         self.gifData = gifData
         self.isGIF = isGIF
         self.filename = filename
+        self.path = path
     }
     
-    init(image: Image? = nil, gifData: Data? = nil, isGIF: Bool, filename: String) {
+    init(image: Image? = nil, gifData: Data? = nil, isGIF: Bool, filename: String, path: String) {
         self.image = image
         self.gifData = gifData
         self.isGIF = isGIF
         self.filename = filename
+        self.path = path
     }
 }
 

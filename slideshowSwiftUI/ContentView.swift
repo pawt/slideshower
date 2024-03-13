@@ -75,13 +75,47 @@ struct ContentView: View {
                         ZStack {
                             
                             // Display thumbnails or filenames
+//                            VStack {
+//                                if shouldDisplayThumbnails && !images.isEmpty {
+//                                    ImageView(identifiableImages: images)
+//                                } else if !shouldDisplayThumbnails {
+//                                    List(images) { image in
+//                                        Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+//                                    }
+//                                }
+//                            }
+                            
                             VStack {
                                 if shouldDisplayThumbnails && !images.isEmpty {
                                     ImageView(identifiableImages: images)
                                 } else if !shouldDisplayThumbnails {
-                                    List(images) { image in
-                                        Text(image.filename) // Assume 'filename' is a property of IdentifiableImage
+                                    List {
+                                        Section(header:
+                                            HStack {
+                                                Text("Filename").bold()
+                                                    .frame(width: 250, alignment: .leading) // Set this width to match your filename column
+                                                    .padding(.leading, 5)
+                                                Text("Path").bold()
+                                                    .frame(alignment: .leading) // Adjust as needed to align with the path column
+                                            }
+                                            .padding(.leading, 10) // This is to align with the padding of the list rows
+                                        ) {
+                                            ForEach(images) { image in
+                                                HStack {
+                                                    Text(image.filename)
+                                                        .frame(width: 250, alignment: .leading) // Match this width with the header
+                                                        .padding(.leading, 5) // Ensure this padding matches the header padding
+                                                    Text(image.path)
+                                                        .lineLimit(1)
+                                                        .truncationMode(.head)
+                                                        .foregroundColor(.gray)
+                                                        .padding(.leading, 10)
+                                                }
+                                            }
+                                        }
                                     }
+                                    .listStyle(PlainListStyle())
+
                                 }
                             }
                             
@@ -653,18 +687,19 @@ struct ContentView: View {
                 do {
                     let data = try Data(contentsOf: url)
                     let fileName = url.lastPathComponent
+                    let filePath = url.deletingLastPathComponent().path
                     let isGIF = url.pathExtension.lowercased() == "gif"
                     
                     if isGIF {
                         // Use NSImage to extract the first frame for display purposes in the UI
                         if let nsImage = NSImage(data: data), let tiffData = nsImage.tiffRepresentation, let firstFrame = NSImage(data: tiffData) {
-                            let gifImage = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName)
+                            let gifImage = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName, path: filePath)
                             newImages.append(gifImage)
                         }
                     } else {
                         // For non-GIFs, we create a SwiftUI Image
                         if let nsImage = NSImage(data: data) {
-                            let image = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName)
+                            let image = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName, path: filePath)
                             newImages.append(image)
                         }
                     }
