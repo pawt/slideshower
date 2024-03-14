@@ -82,7 +82,7 @@ struct ContentView: View {
                                         Section(header:
                                             HStack {
                                                 Text("Filename").bold()
-                                                    .frame(width: 250, alignment: .leading) // Set this width to match your filename column
+                                                    .frame(width: 350, alignment: .leading) // Set this width to match your filename column
                                                 Text("Path").bold()
                                                     .frame(alignment: .leading)
                                                     .padding(.leading, 5) // Adjust as needed to align with the path column
@@ -92,7 +92,7 @@ struct ContentView: View {
                                             ForEach(images) { image in
                                                 HStack {
                                                     Text(image.filename)
-                                                        .frame(width: 250, alignment: .leading) // Match this width with the header
+                                                        .frame(width: 350, alignment: .leading) // Match this width with the header
                                                         .padding(.leading, 5) // Ensure this padding matches the header padding
                                                     Text(image.path)
                                                         .lineLimit(1)
@@ -669,8 +669,6 @@ struct ContentView: View {
         let dispatchGroup = DispatchGroup() // Create a dispatch group to manage batch completion
         
         DispatchQueue.global(qos: .userInitiated).async {
-            var newImages = [IdentifiableImage]()
-            var newFileNames = [String]()
 
             for url in urls {
                 dispatchGroup.enter() // Enter the group for each URL being processed
