@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-//struct IdentifiableImage: Identifiable {
-//    var id = UUID()
-//    var image: Image
-//    var filename: String
-//}
-
 struct IdentifiableImage: Identifiable {
     var id = UUID()  // Unique identifier for each image
     var image: Image?  // Used for static images (non-GIFs)
