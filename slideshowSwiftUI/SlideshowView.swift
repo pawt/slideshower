@@ -43,11 +43,17 @@ struct SlideshowView: View {
                     AnimatedImageView(imageData: gifData)
                         .scaledToFit()
                         .edgesIgnoringSafeArea(.all)
+                        .id(currentIndex)
+                        .transition(.asymmetric(insertion: .opacity, removal: .opacity))
+                        .animation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil, value: currentIndex)
                 } else {
                     image.image?
                         .resizable()
                         .scaledToFit()
+                        .id(currentIndex)
                         .edgesIgnoringSafeArea(.all)
+                        .transition(.asymmetric(insertion: .opacity, removal: .opacity))
+                        .animation(useFadingTransition ? Animation.easeInOut(duration: 1.0) : nil, value: currentIndex)
                 }
             }
             
