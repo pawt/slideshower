@@ -59,6 +59,8 @@ struct ContentView: View {
     
     @State private var isGridViewActive = false
     
+    let supportedFileExtensions = ["jpg", "jpeg", "png", "heic", "gif"]
+    
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
         return displayThumbnails && !hideThumbnailsButton && images.count <= thumbnailsEnabledTreshold
@@ -591,7 +593,7 @@ struct ContentView: View {
                     // Filter out non-image files
                     let imageFileURLs = fileURLs.filter {
                         let fileType = $0.pathExtension.lowercased()
-                        return ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType)
+                        return supportedFileExtensions.contains(fileType)
                     }
                     print("Directory: \(url.lastPathComponent), Image file count: \(imageFileURLs.count)")
                     return result + imageFileURLs.count
@@ -602,7 +604,7 @@ struct ContentView: View {
             } else {
                 // If it's not a directory, check if it's an image file
                 let fileType = url.pathExtension.lowercased()
-                if ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType) {
+                if supportedFileExtensions.contains(fileType) {
                     return result + 1
                 } else {
                     return result
@@ -633,7 +635,7 @@ struct ContentView: View {
                     let fileURLs = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)
                     allUrlsToLoad += fileURLs.filter {
                         let fileType = $0.pathExtension.lowercased()
-                        return ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType)
+                        return supportedFileExtensions.contains(fileType)
                     }
                 } catch {
                     print("Error reading directory contents: \(error)")
@@ -667,7 +669,7 @@ struct ContentView: View {
             let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
             for fileURL in fileURLs {
                 let fileType = fileURL.pathExtension.lowercased()
-                if ["jpg", "jpeg", "png", "heic", "gif"].contains(fileType) {
+                if supportedFileExtensions.contains(fileType) {
                     urlsToLoad.append(fileURL)
                 }
             }
