@@ -17,6 +17,7 @@
 		DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */; };
 		DEB660CE2B9C705A006A3D2C /* AnimatedImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEB660CD2B9C705A006A3D2C /* AnimatedImageView.swift */; };
 		DED7DC822B2DE14100B9CD6B /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = DED7DC812B2DE14100B9CD6B /* Sparkle */; };
+		DEEC72702BA87BB000F70AE3 /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEEC726F2BA87BB000F70AE3 /* GridView.swift */; };
 		DEFBB5C12B3DB900002CB4F9 /* UpdateControllerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFBB5C02B3DB900002CB4F9 /* UpdateControllerWrapper.swift */; };
 		DEFC0CAD2B1F45BB0021E507 /* SlideshowManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		DE658D1C2AD6B0F60006A5EE /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		DE658D1E2AD6BE0F0006A5EE /* SlideshowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowView.swift; sourceTree = "<group>"; };
 		DEB660CD2B9C705A006A3D2C /* AnimatedImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedImageView.swift; sourceTree = "<group>"; };
+		DEEC726F2BA87BB000F70AE3 /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
 		DEF47B342AE7DF9500A9A5DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DEFBB5C02B3DB900002CB4F9 /* UpdateControllerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateControllerWrapper.swift; sourceTree = "<group>"; };
 		DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlideshowManager.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				DEFC0CAC2B1F45BB0021E507 /* SlideshowManager.swift */,
 				DEFBB5C02B3DB900002CB4F9 /* UpdateControllerWrapper.swift */,
 				DE658D1C2AD6B0F60006A5EE /* ImageView.swift */,
+				DEEC726F2BA87BB000F70AE3 /* GridView.swift */,
 				DE658D112AD6B0BE0006A5EE /* Assets.xcassets */,
 				DE658D162AD6B0BE0006A5EE /* slideshowSwiftUI.entitlements */,
 				DE658D132AD6B0BE0006A5EE /* Preview Content */,
@@ -178,6 +181,7 @@
 				DEFBB5C12B3DB900002CB4F9 /* UpdateControllerWrapper.swift in Sources */,
 				DE658D102AD6B0BE0006A5EE /* ContentView.swift in Sources */,
 				DE658D0E2AD6B0BE0006A5EE /* slideshowSwiftUIApp.swift in Sources */,
+				DEEC72702BA87BB000F70AE3 /* GridView.swift in Sources */,
 				DE658D1F2AD6BE0F0006A5EE /* SlideshowView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

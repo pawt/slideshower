@@ -57,6 +57,8 @@ struct ContentView: View {
     
     @State private var isUpdatePopoverPresented = false
     
+    @State private var isGridViewActive = false
+    
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
         return displayThumbnails && !hideThumbnailsButton && images.count <= thumbnailsEnabledTreshold
@@ -347,6 +349,11 @@ struct ContentView: View {
                                                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                                                 Text("- if enabled the slideshow will not terminate itself.")
                                             }
+                                            HStack {
+                                                Text("Grid view (3x3)")
+                                                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                                                Text("- if enabled slideshow will run as a 3x3 grid in a shuffle mode.")
+                                            }
                                             
                                         }
                                         .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
@@ -381,18 +388,35 @@ struct ContentView: View {
                                     Text("Shuffle mode:")
                                     Spacer()
                                     Toggle("", isOn: $randomOrder)
+                                        .disabled(isGridViewActive)
                                 }
                                 .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                                 HStack {
                                     Text("Fading transition:")
                                     Spacer()
                                     Toggle("", isOn: $useFadingTransition)
+                                        .disabled(isGridViewActive)
                                 }
                                 .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
                                 HStack {
                                     Text("Loop slideshow:")
                                     Spacer()
                                     Toggle("", isOn: $loopSlideshow)
+                                        .disabled(isGridViewActive)
+                                }
+                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
+                                HStack {
+                                    Text("Grid view (3x3):")
+                                    Spacer()
+                                    Toggle("", isOn: $isGridViewActive)
+                                        .onChange(of: isGridViewActive) { newValue in
+                                            if newValue {
+                                                // Reset other toggles when Grid view is selected
+                                                randomOrder = false
+                                                useFadingTransition = false
+                                                loopSlideshow = false
+                                            }
+                                        }
                                 }
                                 .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 10))
                             }
@@ -467,8 +491,8 @@ struct ContentView: View {
                     .alert(isPresented: $showAlert)
                     {
                         Alert(
-                            title: Text("No Images Selected"),
-                            message: Text("Please add images before running the slideshow."),
+                            title: Text("No files added"),
+                            message: Text("Please add files before running the slideshow."),
                             dismissButton: .default(Text("OK"))
                         )
                     }
@@ -779,17 +803,42 @@ struct ContentView: View {
             .autoHideDock
         ]
         
-        let slideshowView = SlideshowView(
-            images: images,
-            slideshowDelay: slideshowDelay,
-            randomOrder: randomOrder,
-            loopSlideshow: loopSlideshow,
-            useFadingTransition: useFadingTransition
-            //            isSlideshowRunning: slideshowManager.isSlideshowRunning
-        )
-            .environmentObject(slideshowManager)
         
-        window.contentView = NSHostingView(rootView: slideshowView)
+        if isGridViewActive {
+            let gridView = GridView(
+                images: images,
+                delay: slideshowDelay,
+                randomOrder: randomOrder,
+                loopSlideshow: loopSlideshow,
+                useFadingTransition: useFadingTransition
+            )
+                .environmentObject(slideshowManager)
+            window.contentView = NSHostingView(rootView: gridView)
+        } else {
+            let slideshowView = SlideshowView(
+                images: images,
+                slideshowDelay: slideshowDelay,
+                randomOrder: randomOrder,
+                loopSlideshow: loopSlideshow,
+                useFadingTransition: useFadingTransition
+            )
+                .environmentObject(slideshowManager)
+            window.contentView = NSHostingView(rootView: slideshowView)
+        }
+        
+        
+        
+//        let slideshowView = SlideshowView(
+//            images: images,
+//            slideshowDelay: slideshowDelay,
+//            randomOrder: randomOrder,
+//            loopSlideshow: loopSlideshow,
+//            useFadingTransition: useFadingTransition
+//            //            isSlideshowRunning: slideshowManager.isSlideshowRunning
+//        )
+//            .environmentObject(slideshowManager)
+        
+//        window.contentView = NSHostingView(rootView: slideshowView)
         window.makeKeyAndOrderFront(nil)
     }
     
