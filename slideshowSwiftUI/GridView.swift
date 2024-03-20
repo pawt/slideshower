@@ -51,10 +51,12 @@ struct GridView: View {
             }
         }
         .onAppear(perform: setupGrid)
-        .onDisappear(perform: invalidateTimer)
+        .onDisappear {
+            invalidateTimer()
+            stopSlideshow()
+        }
         .onReceive(slideshowManager.$isSlideshowRunning) { isRunning in
             if !isRunning {
-                print("Button STOP pressed.")
                 stopSlideshow()
             }
         }
@@ -157,10 +159,9 @@ struct GridView: View {
     
     private func stopSlideshow() {
         if !hasStoppedSlideshow {
-            print("Stopping the slideshow.")
+            print("Stopping the slideshow")
             hasStoppedSlideshow = true
-            timer?.invalidate()
-            timer = nil
+            invalidateTimer()
             slideshowManager.isSlideshowRunning = false
             // Ensuring UI changes are done on the main thread
             DispatchQueue.main.async {

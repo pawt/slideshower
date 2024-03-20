@@ -119,7 +119,7 @@ struct SlideshowView: View {
         }
         .onReceive(slideshowManager.$isSlideshowRunning) { isRunning in
             if !isRunning {
-                print("Button STOP pressed.")
+                print("onReceive: isSlideshowRunning = \(slideshowManager.isSlideshowRunning)")
                 stopSlideshow()
             }
         }
@@ -293,7 +293,7 @@ struct SlideshowView: View {
     
     // Function to stop the slideshow
     private func stopSlideshow() {
-        print("Stopping the slideshow.")
+        print("stopSlideshow() method executed")
         slideshowWorkItem?.cancel()
         if slideshowManager.isSlideshowRunning {
             slideshowManager.isSlideshowRunning = false
