@@ -412,7 +412,7 @@ struct ContentView: View {
                                         .onChange(of: isGridViewActive) { newValue in
                                             if newValue {
                                                 // Reset other toggles when Grid view is selected
-                                                randomOrder = false
+                                                randomOrder = true
                                                 useFadingTransition = false
                                                 loopSlideshow = false
                                             }
@@ -760,7 +760,7 @@ struct ContentView: View {
         let loopEnabled = loopSlideshow
         let shuffleEnabled = randomOrder
         let fadingEnabled = useFadingTransition
-        let sessionID = UUID().uuidString
+        let gridViewEnabled = isGridViewActive
         
         // Key for the event
         let key = "slideshowStarted"
@@ -769,12 +769,12 @@ struct ContentView: View {
         let count: UInt = 1
         
         // Segmentation for the event
-        let segmentation: [String : String] = ["sessionID": sessionID,
-                                               "slideshowSize": String(slideshowSize),
+        let segmentation: [String : String] = ["slideshowSize": String(slideshowSize),
                                                "slideshowDelay": String(slideshowDelay),
                                                "loopEnabled": String(loopEnabled),
                                                "shuffleEnabled": String(shuffleEnabled),
-                                               "fadingEnabled": String(fadingEnabled)]
+                                               "fadingEnabled": String(fadingEnabled),
+                                               "gridViewEnabled": String(gridViewEnabled)]
         
         // Record the event with segmentation
         Countly.sharedInstance().recordEvent(key, segmentation: segmentation, count: count)
@@ -826,19 +826,6 @@ struct ContentView: View {
             window.contentView = NSHostingView(rootView: slideshowView)
         }
         
-        
-        
-//        let slideshowView = SlideshowView(
-//            images: images,
-//            slideshowDelay: slideshowDelay,
-//            randomOrder: randomOrder,
-//            loopSlideshow: loopSlideshow,
-//            useFadingTransition: useFadingTransition
-//            //            isSlideshowRunning: slideshowManager.isSlideshowRunning
-//        )
-//            .environmentObject(slideshowManager)
-        
-//        window.contentView = NSHostingView(rootView: slideshowView)
         window.makeKeyAndOrderFront(nil)
     }
     
