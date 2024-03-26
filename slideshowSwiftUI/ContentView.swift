@@ -61,6 +61,9 @@ struct ContentView: View {
     
     let supportedFileExtensions = ["jpg", "jpeg", "png", "heic", "gif"]
     
+    @State private var selectedSortOption = "-"
+    let sortOptions = ["-", "Date Created", "Filename"]
+    
     // Determines if the thumbnails should be displayed
     private var shouldDisplayThumbnails: Bool {
         return displayThumbnails && !hideThumbnailsButton && images.count <= thumbnailsEnabledTreshold
@@ -84,24 +87,34 @@ struct ContentView: View {
                                 } else if !shouldDisplayThumbnails && !images.isEmpty {
                                     List {
                                         Section(header:
-                                            HStack {
-                                                Text("Filename").bold()
-                                                    .frame(width: 350, alignment: .leading) // Set this width to match your filename column
-                                                Text("Path").bold()
-                                                    .frame(alignment: .leading)
-                                                    .padding(.leading, 5) // Adjust as needed to align with the path column
-                                            }
+                                                    HStack {
+                                            Text("Filename").bold()
+                                                .frame(width: 300, alignment: .leading) // Set this width to match your filename column
+                                            Text("Created").bold()
+                                                .frame(width: 120, alignment: .leading)
+                                                .padding(.leading, 10) //
+                                            Text("Path").bold()
+                                                .frame(alignment: .leading)
+                                                .padding(.leading, 10) // Adjust as needed to align with the path column
+                                        }
                                             .padding(.leading, 5) // This is to align with the padding of the list rows
                                         ) {
                                             ForEach(images) { image in
                                                 HStack {
                                                     Text(image.filename)
-                                                        .frame(width: 350, alignment: .leading) // Match this width with the header
+                                                        .frame(width: 300, alignment: .leading) // Match this width with the header
+                                                        .lineLimit(1)
+                                                        .truncationMode(.tail)
+                                                        .help(image.filename)
                                                         .padding(.leading, 5) // Ensure this padding matches the header padding
+                                                    Text(image.creationDate?.formatted(date: .numeric, time: .shortened) ?? "-")
+                                                        .frame(width: 120, alignment: .leading) // Set the width for your date column
+                                                        .padding(.leading, 10)
                                                     Text(image.path)
                                                         .lineLimit(1)
                                                         .truncationMode(.head)
                                                         .foregroundColor(.gray)
+                                                        .help(image.path)
                                                         .padding(.leading, 10)
                                                 }
                                             }
@@ -327,41 +340,82 @@ struct ContentView: View {
                                     .help("Click for more information")
                                     .buttonStyle(PlainButtonStyle())
                                     .popover(isPresented: $isInfoVisible, content: {
-                                        VStack {
-                                            Text("Settings - help")
-                                                .font(.headline)
-                                                .padding()
+                                        VStack(alignment: .leading) { // Set VStack alignment to .leading
+                                            
                                             HStack {
+                                                Spacer() // This spacer will push the Text to the center
+                                                Text("Settings - help")
+                                                    .font(.headline)
+                                                Spacer() // This spacer will ensure the Text stays centered
+                                            }
+                                            .padding(.vertical)
+                                            
+                                            
+                                            VStack(alignment: .leading) { // Align text to the leading edge
+                                                Text("Sort by")
+                                                    .fontWeight(.bold)
+                                                Text("Allows you to choose the order in which photos are displayed.")
+                                            }
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                            
+                                            VStack(alignment: .leading) {
                                                 Text("Delay")
                                                     .fontWeight(.bold)
-                                                Text("- sets the timing between consecutive photos.")
+                                                Text("Sets the timing between consecutive photos.")
                                             }
-                                            HStack {
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                            
+                                            VStack(alignment: .leading) {
                                                 Text("Shuffle mode")
                                                     .fontWeight(.bold)
-                                                Text("- if enabled the photos will be shown in a shuffle mode.")
+                                                Text("When enabled, photos appear in a shuffle mode.")
                                             }
-                                            HStack {
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                            
+                                            VStack(alignment: .leading) {
                                                 Text("Fading transition")
                                                     .fontWeight(.bold)
-                                                Text("- if enabled there will be a fading transition between photos.")
+                                                Text("When enabled, each photo fades into the next.")
                                             }
-                                            HStack {
-                                                Text("Loop slideshow")
-                                                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                                                Text("- if enabled the slideshow will not terminate itself.")
-                                            }
-                                            HStack {
-                                                Text("Grid view (3x3)")
-                                                    .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                                                Text("- if enabled slideshow will run as a 3x3 grid in a shuffle mode.")
-                                            }
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
                                             
+                                            VStack(alignment: .leading) {
+                                                Text("Loop slideshow")
+                                                    .fontWeight(.bold)
+                                                Text("When enabled, the slideshow continuously repeats.")
+                                            }
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
+                                            
+                                            VStack(alignment: .leading) {
+                                                Text("Grid view (3x3)")
+                                                    .fontWeight(.bold)
+                                                Text("When enabled, the slideshow is presented in a 3x3 grid format with shuffle mode active.")
+                                            }
+                                            .padding(.init(top: 0, leading: 0, bottom: 10, trailing: 0))
                                         }
-                                        .padding(.init(top: 10, leading: 10, bottom: 30, trailing: 10))
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     })
                                 }
                                 .padding(.init(top: 0, leading: 0, bottom: 5, trailing: 0))
+                                
+                                HStack {
+                                    Text("Sort by:")
+                                    Spacer() // This spacer will push everything to the right
+                                    Picker("", selection: $selectedSortOption) {
+                                        ForEach(sortOptions, id: \.self) { option in
+                                            Text(option).tag(option)
+                                        }
+                                    }
+                                    .pickerStyle(MenuPickerStyle())
+                                    .frame(width: 160) // Adjust this width as needed
+                                    // The frame modifier will limit the picker's size
+                                    .onChange(of: selectedSortOption) { _ in
+                                        sortImages()
+                                    }
+                                }
+                                .frame(maxWidth: .infinity) // This ensures the HStack takes up all available space
+                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 10))
                                 HStack {
                                     Text("Delay between photos (in sec):")
                                     Spacer()
@@ -385,42 +439,38 @@ struct ContentView: View {
                                         }
                                         
                                 }
-                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                                HStack {
-                                    Text("Shuffle mode:")
-                                    Spacer()
-                                    Toggle("", isOn: $randomOrder)
-                                        .disabled(isGridViewActive)
-                                }
-                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                                HStack {
-                                    Text("Fading transition:")
-                                    Spacer()
-                                    Toggle("", isOn: $useFadingTransition)
-                                        .disabled(isGridViewActive)
-                                }
-                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                                HStack {
-                                    Text("Loop slideshow:")
-                                    Spacer()
-                                    Toggle("", isOn: $loopSlideshow)
-                                        .disabled(isGridViewActive)
-                                }
-                                .padding(.init(top: 0, leading: 10, bottom: 0, trailing: 10))
-                                HStack {
-                                    Text("Grid view (3x3):")
-                                    Spacer()
-                                    Toggle("", isOn: $isGridViewActive)
-                                        .onChange(of: isGridViewActive) { newValue in
-                                            if newValue {
-                                                // Reset other toggles when Grid view is selected
-                                                randomOrder = true
-                                                useFadingTransition = false
-                                                loopSlideshow = false
+                                .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 10))
+
+                                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                                    HStack {
+                                        Toggle("Shuffle mode", isOn: $randomOrder)
+                                            .disabled(isGridViewActive)
+                                        Spacer() // Pushes the toggle to the left
+                                    }
+                                    HStack {
+                                        Spacer() // Pushes the toggle to the right
+                                        Toggle("Loop slideshow", isOn: $loopSlideshow)
+                                    }
+                                    HStack {
+                                        Toggle("Fading transition", isOn: $useFadingTransition)
+                                            .disabled(isGridViewActive)
+                                        Spacer()
+                                    }
+                                    HStack {
+                                        Spacer()
+                                        Toggle("Grid view (3x3)", isOn: $isGridViewActive)
+                                            .onChange(of: isGridViewActive) { newValue in
+                                                if newValue {
+                                                    // Reset other toggles when Grid view is selected
+                                                    randomOrder = true
+                                                    useFadingTransition = false
+                                                    loopSlideshow = false
+                                                }
                                             }
-                                        }
+                                    }
                                 }
                                 .padding(.init(top: 0, leading: 10, bottom: 10, trailing: 10))
+
                             }
                             .padding(0)
                             
@@ -467,6 +517,7 @@ struct ContentView: View {
                 .frame(width: 300)
 
                 VStack() {
+                    
                     Text("Run slideshow")
                         .font(.title2)
                         .padding(.init(top: 20, leading: 0, bottom: 10, trailing: 0))
@@ -706,14 +757,17 @@ struct ContentView: View {
                         let filePath = url.deletingLastPathComponent().path
                         let isGIF = url.pathExtension.lowercased() == "gif"
                         
+                        let resourceValues = try url.resourceValues(forKeys: [.creationDateKey])
+                        let creationDate = resourceValues.creationDate
+                        
                         var imageToAdd: IdentifiableImage?
                         if isGIF {
                             if let nsImage = NSImage(data: data), let tiffData = nsImage.tiffRepresentation, let firstFrame = NSImage(data: tiffData) {
-                                imageToAdd = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName, path: filePath)
+                                imageToAdd = IdentifiableImage(image: Image(nsImage: firstFrame), gifData: data, isGIF: true, filename: fileName, path: filePath, creationDate: creationDate)
                             }
                         } else {
                             if let nsImage = NSImage(data: data) {
-                                imageToAdd = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName, path: filePath)
+                                imageToAdd = IdentifiableImage(image: Image(nsImage: nsImage), gifData: nil, isGIF: false, filename: fileName, path: filePath, creationDate: creationDate)
                             }
                         }
                         
@@ -842,6 +896,20 @@ struct ContentView: View {
         // This is the action tied to your "Check for updates" button
         updaterControllerWrapper.updaterController?.checkForUpdates(nil)
         
+    }
+    
+    func sortImages() {
+        switch selectedSortOption {
+        case "Date Created":
+            images.sort { ($0.creationDate ?? Date.distantPast) < ($1.creationDate ?? Date.distantPast) }
+        case "Filename":
+            images.sort { $0.filename < $1.filename }
+        case "-":
+            // Do not sort the images, they remain in the order they were added
+            break
+        default:
+            break
+        }
     }
     
 }
